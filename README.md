@@ -23,8 +23,8 @@ Projeto desenvolvido como parte do Trabalho de Conclusão de Curso (TCC) do curs
 
 O projeto tem como objetivo auxiliar microempreendedores individuais (MEIs) por meio de um sistema que permite a divulgação de seus negócios e serviços, aproximando-os do público-alvo e ampliando seu alcance.
 
-> ### ⚠️ **Projeto em Manutenção**
-> Alguns recursos podem não estar funcionando corretamente.
+> ### ⚠️ **Status do Projeto:**
+> Em manutenção - Alguns recursos podem não estar funcionando corretamente.
 
 ---
 
@@ -127,6 +127,8 @@ Para rodar os testes automatizados:
 npm run test
 ```
 **Tecnologias utilizadas para os testes:** Jest.
+
+---
 
 ## 🌍 Deploy da Aplicação
 
