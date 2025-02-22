@@ -1,0 +1,21 @@
+name: Test Coverage
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+      
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Rodar testes com cobertura
+        run: npm run test:coverage
+      
+      - name: Upload para Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
