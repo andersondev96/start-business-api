@@ -1,12 +1,18 @@
-import { Request, Response } from "express";
+import { FastifyRequest, FastifyReply } from "fastify";
 import { container } from "tsyringe";
+import { z } from "zod";
 
 import { GoogleAuthenticationService } from "@modules/users/services/GoogleAuthenticationService";
 
 export class GoogleAuthenticationController {
 
-  public async handle(request: Request, response: Response) {
-    const { name, email, avatar } = request.body;
+  public async handle(request: FastifyRequest, reply: FastifyReply) {
+    const googleAuthenticationParamsSchema = z.object({
+      name: z.string({ message: "Name is required" }).min(1, { message: "Name is required" }),
+      email: z.string().email("Invalid email format"),
+      avatar: z.string().url("Invalid URL format").optional()
+    });
+    const { name, email, avatar } = googleAuthenticationParamsSchema.parse(request.body);
 
     const googleAuthenticationService = container.resolve(GoogleAuthenticationService);
 
@@ -16,6 +22,6 @@ export class GoogleAuthenticationController {
       avatar
     });
 
-    return response.status(201).json(auth);
+    return reply.status(201).send(auth);
   }
 }

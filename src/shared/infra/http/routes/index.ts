@@ -1,4 +1,5 @@
 import { Router } from "express";
+import type { FastifyInstance } from "fastify";
 
 import assessmentsRoute from "@modules/assessments/infra/http/routes/assessments.routes";
 import categoriesRoutes from "@modules/categories/infra/http/routes/categories.routes";
@@ -11,10 +12,10 @@ import servicesRouter from "@modules/services/infra/http/routes/services.routes"
 import passwordRoutes from "@modules/users/infra/http/routes/password.routes";
 import sessionsRouter from "@modules/users/infra/http/routes/sessions.routes";
 import usersRouter from "@modules/users/infra/http/routes/users.routes";
-const routes = Router();
 
-routes.use("/users", usersRouter);
-routes.use("/sessions", sessionsRouter);
+export async function routes(app: FastifyInstance) {
+app.register(usersRouter);
+/* routes.use("/sessions", sessionsRouter);
 routes.use("/password", passwordRoutes);
 routes.use("/companies", companiesRoutes);
 routes.use("/services", servicesRouter);
@@ -23,7 +24,7 @@ routes.use("/assessments", assessmentsRoute);
 routes.use("/proposals", proposalsRouter);
 routes.use("/budgets", budgetsRoutes);
 routes.use("/customers", customersRouter);
-routes.use("/entrepreneurs", entrepreneursRoutes);
-
+routes.use("/entrepreneurs", entrepreneursRoutes); */
+}
 
 export default routes;

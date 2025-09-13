@@ -1,19 +1,22 @@
 import "@shared/container";
-import { CelebrateError } from "celebrate";
-import cors from "cors";
-import express, { NextFunction, Request, Response } from "express";
+import fastify from "fastify";
 import { createServer } from "http";
+import path from "path";
 import { Server, Socket } from "socket.io";
-import swaggerUi from "swagger-ui-express";
+import { ZodError } from "zod";
 
 import upload from "@config/upload";
+import cors from "@fastify/cors";
+import fastifyMultipart from "@fastify/multipart";
+import fastifyStatic from "@fastify/static";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 import * as Sentry from "@sentry/node";
 import { AppError } from "@shared/errors/AppError";
 
-import swaggerFile from "../../../swagger.json";
 import routes from "./routes";
 
-const app = express();
+const app = fastify();
 // app.use(express.static(path.join(__dirname, "..", "..", "..", "..", "public")));
 
 // app.use(rateLimiter);
@@ -21,20 +24,17 @@ const app = express();
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   integrations: [
-    // enable HTTP calls tracing
     new Sentry.Integrations.Http({ tracing: true }),
-    // enable Express.js middleware tracing
-    new Sentry.Integrations.Express({ app }),
-    // Automatically instrument Node.js libraries and frameworks
     ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations()
   ],
-
   tracesSampleRate: 1.0
 });
 
-app.use(Sentry.Handlers.requestHandler());
+app.addHook("onRequest", async (request, reply) => {
+  Sentry.Handlers.requestHandler()(request.raw, reply.raw, () => {});
+});
 
-const http = createServer(app);
+const http = createServer(app.server);
 const io = new Server(http, {
   cors: {
     origin: "*",
@@ -46,48 +46,88 @@ io.on("connection", (socket: Socket) => {
   console.log("Socket", socket.id);
 });
 
-app.use(cors());
+app.register(cors, {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"]
+});
 
-app.use(express.json());
-
-app.use(Sentry.Handlers.tracingHandler());
-
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
-
-app.use("/avatar", express.static(`${upload.tmpFolder}/avatar`));
-
-app.use("/company", express.static(`${upload.tmpFolder}/company`));
-
-app.use("/service", express.static(`${upload.tmpFolder}/service`));
-
-app.use("/budgets", express.static(`${upload.tmpFolder}/budgets`));
-
-app.use("/company_logo", express.static(`${upload.tmpFolder}/company_logo`));
-
-app.use(routes);
-
-app.use(Sentry.Handlers.errorHandler());
-
-app.use((err: Error, request: Request, response: Response, _: NextFunction) => {
-  if (err instanceof CelebrateError) {
-    const errorBody = err.details.get("body");
-    return response.status(400).json({
-      status: "validate error",
-      message: errorBody.message
-    });
+// Swagger
+app.register(fastifySwagger, {
+  swagger: {
+    consumes: ["application/json"],
+    produces: ["application/json"],
+    info: {
+      title: "API",
+      description: "API",
+      version: "1.0.0"
+    }
   }
+});
 
-  if (err instanceof AppError) {
-    return response.status(err.statusCode).json({
+app.register(fastifyMultipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10 MB
+  }
+});
+
+app.register(fastifySwaggerUi, {
+  routePrefix: "/api-docs",
+  uiConfig: {
+    docExpansion: "full",
+    deepLinking: false
+  }
+});
+
+// Static files
+app.register(fastifyStatic, {
+  root: path.join(upload.tmpFolder, "avatar"),
+  prefix: "/avatar/"
+});
+
+app.register(fastifyStatic, {
+  root: path.join(upload.tmpFolder, "company"),
+  prefix: "/company/"
+});
+
+app.register(fastifyStatic, {
+  root: path.join(upload.tmpFolder, "budgets"),
+  prefix: "/budgets/"
+});
+
+app.register(fastifyStatic, {
+  root: path.join(upload.tmpFolder, "service"),
+  prefix: "/service/"
+});
+
+app.register(fastifyStatic, {
+  root: path.join(upload.tmpFolder, "company_logo"),
+  prefix: "/company_logo/"
+});
+
+app.register(routes);
+
+app.setErrorHandler((error, request, reply) => {
+  Sentry.captureException(error);
+
+  if (error instanceof ZodError) {
+    return reply.status(400).send({
       status: "error",
-      message: err.message
+      message: error.errors.map(e => e.message).join(", ")
     });
   }
 
-  return response.status(500).json({
+  if (error instanceof AppError) {
+    return reply.status(error.statusCode).send({
+      status: "error",
+      message: error.message
+    });
+  }
+
+  return reply.status(500).send({
     status: "error",
-    message: err.message
+    message: "Internal server error"
   });
 });
+
 
 export { http, io };

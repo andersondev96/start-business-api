@@ -1,4 +1,5 @@
-import { Request, Response, NextFunction } from "express";
+
+import type { FastifyReply, FastifyRequest } from "fastify";
 import { verify } from "jsonwebtoken";
 
 import auth from "@config/auth";
@@ -8,7 +9,8 @@ interface IPayload {
   sub: string;
 }
 
-export async function ensureAuthenticated(request: Request, response: Response, next: NextFunction) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function ensureAuthenticated(request: FastifyRequest, response: FastifyReply) {
 
   const authHeader = request.headers.authorization;
 
@@ -21,14 +23,12 @@ export async function ensureAuthenticated(request: Request, response: Response, 
   try {
     const { sub: user_id } = verify(
       token,
-      auth.secret_token,
+      auth.secret_token
     ) as IPayload;
 
     request.user = {
-      id: user_id,
+      id: user_id
     };
-
-    next();
   } catch {
     throw new AppError("Invalid token!");
   }

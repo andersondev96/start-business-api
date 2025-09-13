@@ -1,13 +1,9 @@
-import { celebrate } from "celebrate";
-import { Router } from "express";
-import multer from "multer";
+import type { FastifyInstance } from "fastify";
+import { z } from "zod";
 
-import uploadConfig from "@config/upload";
 import { FindUserByEntrepreneurController } from "@modules/entrepreneurs/infra/http/controllers/FindUserByEntrepreneurController";
-import { userValidator } from "@modules/users/validator/UserValidator";
 import { ensureAuthenticated } from "@shared/infra/http/middlewares/ensureAuthenticated";
 
-import { updateUserValidator } from "@modules/users/validator/UpdateUserValidator";
 import { CreateUsersController } from "../controllers/CreateUsersController";
 import { DeleteUserController } from "../controllers/DeleteUserController";
 import { FindByUserIdController } from "../controllers/FindByUserIdController";
@@ -16,8 +12,19 @@ import { FindUserByEmailController } from "../controllers/FindUserByEmailControl
 import { ListFavoritesController } from "../controllers/ListFavoritesController";
 import { UpdateUserAvatarController } from "../controllers/UpdateUserAvatarController";
 import { UpdateUserController } from "../controllers/UpdateUserController";
-const usersRouter = Router();
-const uploadAvatar = multer(uploadConfig);
+
+const userSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string({ message: "Name is required" }).min(1, { message: "Name is required" }),
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
+  isEntrepreneur: z.enum(["ADMIN", "ENTREPRENEUR", "CUSTOMER"]).default("CUSTOMER")
+});
+
+const createUserResponseSchema = z.object({
+  user: userSchema,
+  token: z.string().uuid()
+});
 
 const createUserController = new CreateUsersController();
 const findUserByEmailController = new FindUserByEmailController();
@@ -29,18 +36,37 @@ const findUserByEntrepreneurController = new FindUserByEntrepreneurController();
 const listFavoritesController = new ListFavoritesController();
 const findFavoriteController = new FindFavoriteController();
 
-usersRouter.post("/", celebrate(userValidator), createUserController.handle);
-usersRouter.get("/email", findUserByEmailController.handle);
-usersRouter.get("/profile", ensureAuthenticated, findByUserIdController.handle);
-usersRouter.get("/entrepreneur", ensureAuthenticated, findUserByEntrepreneurController.handle);
-usersRouter.get("/favorites", ensureAuthenticated, listFavoritesController.handle);
-usersRouter.get("/favorite/:table_id", ensureAuthenticated, findFavoriteController.handle);
-usersRouter.delete("/", ensureAuthenticated, deleteUserController.handle);
-usersRouter.put("/", ensureAuthenticated, celebrate(updateUserValidator), updateUserController.handle);
-usersRouter.patch(
-  "/avatar",
-  ensureAuthenticated,
-  uploadAvatar.single("avatar"),
-  updateUserAvatarController.handle
-);
-export default usersRouter;
+export async function usersRoutes(app: FastifyInstance) {
+  app.post("/", {
+    schema: {
+      summary: "Create User",
+      tags: ["users"],
+      body: z.object({
+        name: z.string({ message: "Name is required" }).min(1, { message: "Name is required" }),
+        email: z.string().email("Invalid email format"),
+        password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
+        isEntrepreneur: z.enum(["ADMIN", "ENTREPRENEUR", "CUSTOMER"]).default("CUSTOMER")
+      }),
+      response: {
+        201: createUserResponseSchema
+      }
+    }
+  }, createUserController.handle);
+
+  app.get("/email", findUserByEmailController.handle);
+  app.get("/profile", { onRequest: [ensureAuthenticated] }, findByUserIdController.handle);
+  app.get("/entrepreneur", { onRequest: [ensureAuthenticated] }, findUserByEntrepreneurController.handle);
+  app.get("/favorites", { onRequest: [ensureAuthenticated] }, listFavoritesController.handle);
+  app.get("/favorite/:table_id", { onRequest: [ensureAuthenticated] }, findFavoriteController.handle);
+  app.delete("/", { onRequest: [ensureAuthenticated] }, deleteUserController.handle);
+  app.put("/", { onRequest: [ensureAuthenticated] }, updateUserController.handle);
+  app.patch(
+    "/avatar",
+    { 
+      onRequest: [ensureAuthenticated]
+    },
+    updateUserAvatarController.handle
+  );
+}
+
+export default usersRoutes;
