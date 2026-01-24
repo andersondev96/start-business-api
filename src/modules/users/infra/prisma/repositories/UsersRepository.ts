@@ -1,74 +1,69 @@
-import { prisma } from "@database/prisma";
-import { ICreateUserDTO } from "@modules/users/dtos/ICreateUserDTO";
-import { IUsersRepository } from "@modules/users/repositories/IUsersRepository";
+import { PrismaClient } from '@prisma/client'
+import { ICreateUserDTO } from '@modules/users/dtos/ICreateUserDTO'
+import { IUpdateUserDTO } from '@modules/users/dtos/IUpdateUserDTO'
+import { IUsersRepository } from '@modules/users/repositories/IUsersRepository'
 
-import { User } from "../entities/User";
+import { User } from '../entities/User'
 
 export class UsersRepository implements IUsersRepository {
+  constructor(private prisma: PrismaClient) {}
 
-  async findById(id: string): Promise<User> {
-    const user = await prisma.user.findUnique({
+  async findById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
       where: {
-        id
-      }
-    });
-
-    return user;
-  }
-
-  async create({ name, email, password, id, avatar }: ICreateUserDTO): Promise<User> {
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password,
         id,
-        avatar
-      }
-    });
-
-    return user;
+      },
+    })
   }
 
-  async findByMail(email: string): Promise<User | undefined> {
-    const user = await prisma.user.findUnique({
+  async create(data: ICreateUserDTO): Promise<User> {
+    return this.prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        avatar: data.avatar ?? null,
+      },
+    })
+  }
+
+  async findByMail(email: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
       where: {
-        email
-      }
-    });
+        email,
+      },
+    })
 
-    return user;
+    return user
   }
 
-  public async addFavorite(user_id: string, favorite: string): Promise<User> {
-    const user = await prisma.user.findUnique({ where: { id: user_id } });
+  public async addFavorite(userId: string, favorite: string): Promise<User> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+
     if (!user) {
-      throw new Error(`User with id ${user_id} not found`);
+      throw new Error(`User with id ${userId} not found`)
     }
 
-    const updatedFavorites = [...user.favorites, favorite];
-    const updateUser = await prisma.user.update({
-      where: { id: user_id },
-      data: { favorites: updatedFavorites }
-    });
+    const favorites = Array.from(new Set([...(user.favorites ?? []), favorite]))
 
-    return updateUser;
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { favorites },
+    })
   }
 
-  async update(user: ICreateUserDTO): Promise<User> {
-    const updateUser = await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        ...user
-      }
-    });
+  async update(data: IUpdateUserDTO): Promise<User> {
+    const { id, ...fields } = data
 
-    return updateUser;
+    return this.prisma.user.update({
+      where: { id },
+      data: { ...fields },
+    })
   }
 
   async delete(id: string): Promise<void> {
-    await prisma.user.delete({
-      where: { id }
-    });
+    await this.prisma.user.delete({
+      where: { id },
+    })
   }
 }
