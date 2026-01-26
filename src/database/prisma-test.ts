@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@database/test-client'
 import path from 'path'
 
 const dbPath = path.resolve(__dirname, '../../test/prisma/test.db')

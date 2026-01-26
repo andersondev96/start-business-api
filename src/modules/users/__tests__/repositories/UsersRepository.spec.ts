@@ -1,8 +1,8 @@
 import { prismaTest } from '@database/prisma-test'
-import { UsersRepository } from '@modules/users/infra/prisma/repositories/UsersRepository'
+import { UsersRepositoryTest } from './UserRepositoryTest'
 
 describe('UsersRepository', () => {
-  const repo = new UsersRepository(prismaTest)
+  const repo = new UsersRepositoryTest(prismaTest)
 
   it('deve criar um usuário', async () => {
     const user = await repo.create({
