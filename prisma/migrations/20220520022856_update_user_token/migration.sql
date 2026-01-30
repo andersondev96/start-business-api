@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "userTokens" ALTER COLUMN "createdAt" SET DEFAULT CURRENT_TIMESTAMP;
