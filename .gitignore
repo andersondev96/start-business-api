@@ -5,4 +5,9 @@ coverage
 .env
 !tmp/.gitkeep
 dist
+
+# Bancos de teste
+test/test.db
+test/test.db-journal
+src/database/test-client/
 src/database/test-client
