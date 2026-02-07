@@ -1,56 +1,84 @@
-import { FakeEntrepreneursRepository } from "@modules/entrepreneurs/repositories/Fakes/FakeEntrepreneursRepository";
-import { FakeEntrepreneursSettingsRepository } from "@modules/entrepreneurs/repositories/Fakes/FakeEntrepreneursSettingsRepository";
-import { IEntrepreneursRepository } from "@modules/entrepreneurs/repositories/IEntrepreneursRepository";
-import { IEntrepreneursSettingsRepository } from "@modules/entrepreneurs/repositories/IEntrepreneursSettingsRepository";
-import { AppError } from "@shared/errors/AppError";
+import { FakeEntrepreneursRepository } from '@modules/entrepreneurs/repositories/Fakes/FakeEntrepreneursRepository'
+import { FakeEntrepreneursSettingsRepository } from '@modules/entrepreneurs/repositories/Fakes/FakeEntrepreneursSettingsRepository'
+import { AppError } from '@shared/errors/AppError'
 
-import { FakeHashProvider } from "../providers/HashProvider/Fakes/FakeHashProvider";
-import { IHashProvider } from "../providers/HashProvider/models/IHashProvider";
-import { FakeUsersRepository } from "../repositories/Fakes/FakeUsersRepository";
-import { IUsersRepository } from "../repositories/IUsersRepository";
-import { CreateUserService } from "../services/CreateUserService";
+import { FakeHashProvider } from '../providers/HashProvider/Fakes/FakeHashProvider'
+import { FakeUsersRepository } from '../repositories/Fakes/FakeUsersRepository'
+import { CreateUserService } from '../services/CreateUserService'
 
-let fakeUsersRepository: IUsersRepository;
-let fakeEntrepreneurRepository: IEntrepreneursRepository;
-let fakeEntrepreneurSettingsRepository: IEntrepreneursSettingsRepository;
-let fakeHashProvider: IHashProvider;
-let createUserService: CreateUserService;
+let fakeUsersRepository: FakeUsersRepository
+let fakeEntrepreneurRepository: FakeEntrepreneursRepository
+let fakeEntrepreneurSettingsRepository: FakeEntrepreneursSettingsRepository
+let fakeHashProvider: FakeHashProvider
+let createUserService: CreateUserService
 
-
-describe("CreateUserService", () => {
+describe('CreateUserService', () => {
   beforeEach(() => {
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
-    fakeEntrepreneurRepository = new FakeEntrepreneursRepository();
-    fakeEntrepreneurSettingsRepository = new FakeEntrepreneursSettingsRepository();
+    fakeUsersRepository = new FakeUsersRepository()
+    fakeHashProvider = new FakeHashProvider()
+    fakeEntrepreneurRepository = new FakeEntrepreneursRepository()
+    fakeEntrepreneurSettingsRepository =
+      new FakeEntrepreneursSettingsRepository()
+
     createUserService = new CreateUserService(
       fakeUsersRepository,
       fakeEntrepreneurRepository,
       fakeEntrepreneurSettingsRepository,
       fakeHashProvider
-    );
-  });
+    )
+  })
 
-  it("Should be able to create a new user", async () => {
+  it('should be able to create a new standard user', async () => {
     const user = await createUserService.execute({
-      name: "John doe",
-      email: "john@example.com",
-      password: "123456",
-      isEntrepreneur: true
-    });
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: '123456',
+      isEntrepreneur: false,
+    })
 
-    expect(user).toHaveProperty("id");
-  });
+    expect(user).toHaveProperty('id')
+    expect(user.email).toBe('john@example.com')
 
-  it("Should not be able to create an existing user", async () => {
+    expect(user).not.toHaveProperty('password')
+  })
+
+  it('should be able to create a new user with entrepreneur profile', async () => {
     const user = await createUserService.execute({
-      name: "John doe",
-      email: "john@example.com",
-      password: "123456"
-    });
+      name: 'Elon Musk',
+      email: 'elon@tesla.com',
+      password: 'mars_mission',
+      isEntrepreneur: true,
+    })
 
-    await expect(createUserService.execute(user)).rejects.toBeInstanceOf(
-      AppError
-    );
-  });
-});
+    expect(user).toHaveProperty('id')
+
+    const createdEntrepreneur = await fakeEntrepreneurRepository.findByUser(
+      user.id!
+    )
+
+    expect(createdEntrepreneur).toBeTruthy()
+    expect(createdEntrepreneur.user_id).toBe(user.id)
+
+    const createdSettings =
+      await fakeEntrepreneurSettingsRepository.findByEntrepreneur(
+        createdEntrepreneur.id
+      )
+    expect(createdSettings).toBeTruthy()
+  })
+
+  it('should not be able to create a user with duplicate email', async () => {
+    await createUserService.execute({
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: '123456',
+    })
+
+    await expect(
+      createUserService.execute({
+        name: 'John Doe Duplicate',
+        email: 'john@example.com',
+        password: '123456',
+      })
+    ).rejects.toBeInstanceOf(AppError)
+  })
+})

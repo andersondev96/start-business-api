@@ -1,45 +1,36 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
-import { container } from "tsyringe";
-import { z } from "zod";
+import { FastifyReply, FastifyRequest } from 'fastify'
+import { container } from 'tsyringe'
+import { z } from 'zod'
+import { CreateUserService } from '@modules/users/services/CreateUserService'
 
-import { CreateUserService } from "@modules/users/services/CreateUserService";
-import { AppError } from "@shared/errors/AppError";
+const createUserBodySchema = z.object({
+  name: z.string({ required_error: 'Name is required' }).min(1),
+  email: z
+    .string({ required_error: 'Email is required' })
+    .email('Invalid email format'),
+  password: z
+    .string({ required_error: 'Password is required' })
+    .min(8, 'Password must be at least 8 chars'),
+  isEntrepreneur: z.boolean().default(false),
+})
 
 export class CreateUsersController {
-  async handle(request: FastifyRequest, response: FastifyReply): Promise<FastifyReply> {
+  async handle(
+    request: FastifyRequest,
+    response: FastifyReply
+  ): Promise<FastifyReply> {
+    const { name, email, password, isEntrepreneur } =
+      createUserBodySchema.parse(request.body)
 
-    const createUserBodySchema = z.object({
-      name: z.string({ message: "Name is required" }).min(1, { message: "Name is required" }),
-      email: z.string().email("Invalid email format"),
-      password: z.string().min(8, { message: "Password must be at least 8 characters long" }),
-      isEntrepreneur: z.boolean().default(false)
-    });
+    const createUserService = container.resolve(CreateUserService)
 
-    const { name, email, password, isEntrepreneur } = createUserBodySchema.parse(request.body);
+    const user = await createUserService.execute({
+      name,
+      email,
+      password,
+      isEntrepreneur,
+    })
 
-    try {
-      const createUserService = container.resolve(CreateUserService);
-
-      const user = await createUserService.execute({
-        name,
-        email,
-        password,
-        isEntrepreneur
-      });
-
-    return response.status(201).send(user);
-    } catch (error) {
-      if (error instanceof AppError) {
-        return response.status(error.statusCode).send({
-          status: "error",
-          message: error.message
-        });
-      }
-
-      return response.status(500).send({
-        status: "error",
-        message: "Internal server error"
-      });
-    }
+    return response.status(201).send(user)
   }
 }

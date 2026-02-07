@@ -1,7 +1,8 @@
 export interface IUserResponseDTO {
-  email: string;
-  name: string;
-  id: string;
-  avatar?: string;
-  favorites?: string[];
+  id: string
+  name: string
+  email: string
+  avatar: string | null
+  favorites?: string[]
+  createdAt: Date
 }

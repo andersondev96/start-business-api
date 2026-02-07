@@ -1,3 +1,5 @@
+import 'reflect-metadata'
+
 import { prismaTest } from '@database/prisma-test'
 import { beforeAll, beforeEach, afterAll } from 'vitest'
 import { execSync } from 'child_process'

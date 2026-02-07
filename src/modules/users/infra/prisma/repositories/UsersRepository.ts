@@ -2,8 +2,8 @@ import { PrismaClient } from '@prisma/client'
 import { ICreateUserDTO } from '@modules/users/dtos/ICreateUserDTO'
 import { IUpdateUserDTO } from '@modules/users/dtos/IUpdateUserDTO'
 import { IUsersRepository } from '@modules/users/repositories/IUsersRepository'
-
 import { User } from '../entities/User'
+import { UserMap } from '@modules/users/mapper/UserMap'
 
 export class UsersRepository implements IUsersRepository {
   constructor(private prisma: PrismaClient) {}
@@ -38,18 +38,16 @@ export class UsersRepository implements IUsersRepository {
   }
 
   public async addFavorite(userId: string, favorite: string): Promise<User> {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } })
-
-    if (!user) {
-      throw new Error(`User with id ${userId} not found`)
-    }
-
-    const favorites = Array.from(new Set([...(user.favorites ?? []), favorite]))
-
-    return this.prisma.user.update({
+    const user = await this.prisma.user.update({
       where: { id: userId },
-      data: { favorites },
+      data: {
+        favorites: {
+          push: favorite,
+        },
+      },
     })
+
+    return UserMap.toDomain(user)
   }
 
   async update(data: IUpdateUserDTO): Promise<User> {

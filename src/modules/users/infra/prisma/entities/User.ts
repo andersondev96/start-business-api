@@ -8,7 +8,11 @@ export class User {
   createdAt?: Date
   updatedAt?: Date
 
-  constructor(props: Partial<User>) {
-    return Object.assign(this, props)
+  constructor(
+    props: Omit<User, 'id' | 'createdAt' | 'updatedAt'>,
+    id?: string
+  ) {
+    Object.assign(this, props)
+    if (id) this.id = id
   }
 }

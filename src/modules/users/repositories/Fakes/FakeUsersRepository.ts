@@ -1,69 +1,77 @@
-import { v4 as uuid } from "uuid";
-
-import { ICreateUserDTO } from "@modules/users/dtos/ICreateUserDTO";
-import { User } from "@modules/users/infra/prisma/entities/User";
-
-import { IUsersRepository } from "../IUsersRepository";
+import { v4 as uuid } from 'uuid'
+import { ICreateUserDTO } from '@modules/users/dtos/ICreateUserDTO'
+import { IUpdateUserDTO } from '@modules/users/dtos/IUpdateUserDTO'
+import { User } from '@modules/users/infra/prisma/entities/User'
+import { IUsersRepository } from '../IUsersRepository'
 
 export class FakeUsersRepository implements IUsersRepository {
+  private users: User[] = []
 
-  public async findById(id: string): Promise<User> {
-    const findUserById = this.users.find((user) => user.id === id);
-
-    return findUserById;
+  public async findById(id: string): Promise<User | null> {
+    const findUserById = this.users.find((user) => user.id === id)
+    return findUserById || null
   }
 
-  private users: User[] = [];
+  public async findByMail(email: string): Promise<User | null> {
+    const findUser = this.users.find((user) => user.email === email)
+    return findUser || null
+  }
 
   public async create(data: ICreateUserDTO): Promise<User> {
-    Object.assign(data, {
-      id: uuid()
-    });
+    const user: User = {
+      ...data,
+      id: uuid(),
+      favorites: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      avatar: data.avatar ?? null,
+    } as User
 
-    this.users.push(data);
-    return data;
+    this.users.push(user)
+    return user
   }
 
-  public async findByMail(email: string): Promise<User> {
-    const findUser = this.users.find((user) => user.email === email);
+  public async update(data: IUpdateUserDTO): Promise<User> {
+    const findIndex = this.users.findIndex(
+      (findUser) => findUser.id === data.id
+    )
 
-    return findUser;
+    const user = this.users[findIndex]
+
+    const updatedUser: User = {
+      ...user,
+      ...data,
+      updatedAt: new Date(),
+    }
+
+    this.users[findIndex] = updatedUser
+
+    return updatedUser
   }
 
   public async addFavorite(user_id: string, favorite: string): Promise<User> {
-    const user = this.users.find((user) => user.id === user_id);
+    const findIndex = this.users.findIndex((user) => user.id === user_id)
+    const user = this.users[findIndex]
 
     if (!user) {
-      throw new Error(`User with id ${user_id} not found`);
+      throw new Error(`User with id ${user_id} not found`)
     }
-
-    const updatedFavorites = [...user.favorites || [], favorite];
 
     const updatedUser = {
       ...user,
-      favorites: updatedFavorites
-    };
+      favorites: [...(user.favorites || []), favorite],
+    }
 
-    this.users.splice(this.users.indexOf(user), 1, updatedUser);
+    this.users[findIndex] = updatedUser
 
-    this.users.findIndex(user => user.id === user_id);
-
-    return updatedUser;
-  }
-
-  public async update(user: ICreateUserDTO): Promise<User> {
-    const index = this.users.findIndex(findUser => findUser.id === user.id);
-
-    this.users[index] = user;
-
-    return user;
+    return updatedUser
   }
 
   public async delete(id: string): Promise<void> {
-    const index = this.users.findIndex(
-      user => user.id === id
-    );
+    const index = this.users.findIndex((user) => user.id === id)
 
-    this.users.splice(index, 1);
+    if (index !== -1) {
+      this.users.splice(index, 1)
+    }
   }
 }
