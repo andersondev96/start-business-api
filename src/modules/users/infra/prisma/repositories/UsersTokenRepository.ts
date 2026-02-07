@@ -1,16 +1,20 @@
-import { prisma } from "@database/prisma";
-import { ICreateUserTokenDTO } from "@modules/users/dtos/ICreateUserTokenDTO";
-import { IUsersTokenRepository } from "@modules/users/repositories/IUsersTokenRepository";
+import { prisma } from '@database/prisma'
+import { ICreateUserTokenDTO } from '@modules/users/dtos/ICreateUserTokenDTO'
+import { IUsersTokenRepository } from '@modules/users/repositories/IUsersTokenRepository'
 
-import { UserToken } from "../entities/UserToken";
+import { UserToken } from '../entities/UserToken'
 
 export class UsersTokenRepository implements IUsersTokenRepository {
-  async create({ expires_date, refresh_token, user_id }: ICreateUserTokenDTO): Promise<UserToken> {
+  async create({
+    expires_date,
+    refresh_token,
+    user_id,
+  }: ICreateUserTokenDTO): Promise<UserToken> {
     const token = await prisma.userToken.create({
       data: { expires_date, refresh_token, user_id },
-    });
+    })
 
-    return token;
+    return token
   }
 
   async findByUserAndRefreshToken(
@@ -22,9 +26,9 @@ export class UsersTokenRepository implements IUsersTokenRepository {
         user_id,
         refresh_token,
       },
-    });
+    })
 
-    return usersToken;
+    return usersToken
   }
 
   async deleteById(id: string): Promise<void> {
@@ -32,14 +36,14 @@ export class UsersTokenRepository implements IUsersTokenRepository {
       where: {
         id,
       },
-    });
+    })
   }
 
   async findByRefreshToken(refresh_token: string): Promise<UserToken> {
     const userToken = await prisma.userToken.findFirst({
       where: { refresh_token },
-    });
+    })
 
-    return userToken;
+    return userToken
   }
 }
