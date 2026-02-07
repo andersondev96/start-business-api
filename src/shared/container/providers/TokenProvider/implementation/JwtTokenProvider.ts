@@ -1,5 +1,5 @@
 import { sign, verify } from 'jsonwebtoken'
-import authConfig from '@config/auth' // Seu arquivo de configuração
+import authConfig from '@config/auth'
 import { ITokenProvider } from '../models/ITokenProvider'
 
 export class JwtTokenProvider implements ITokenProvider {
