@@ -1,73 +1,83 @@
-import { AppError } from "@shared/errors/AppError";
+import { describe, it, expect, beforeEach } from 'vitest'
+import { AppError } from '@shared/errors/AppError'
 
-import { FakeDateProvider } from "../../../shared/container/providers/DateProvider/Fakes/FakeDateProvider";
-import { IDateProvider } from "../../../shared/container/providers/DateProvider/models/IDateProvider";
-import { FakeHashProvider } from "../providers/HashProvider/Fakes/FakeHashProvider";
-import { IHashProvider } from "../providers/HashProvider/models/IHashProvider";
-import { FakeUsersRepository } from "../repositories/Fakes/FakeUsersRepository";
-import { FakeUsersTokenRepository } from "../repositories/Fakes/FakeUsersTokenRepository";
-import { IUsersRepository } from "../repositories/IUsersRepository";
-import { IUsersTokenRepository } from "../repositories/IUsersTokenRepository";
-import { AuthenticateUserService } from "../services/AuthenticateUserService";
+import { FakeUsersRepository } from '../repositories/Fakes/FakeUsersRepository'
+import { FakeUsersTokenRepository } from '../repositories/Fakes/FakeUsersTokenRepository'
+import { FakeHashProvider } from '../providers/HashProvider/Fakes/FakeHashProvider'
+import { FakeDateProvider } from '../../../shared/container/providers/DateProvider/Fakes/FakeDateProvider'
+import { FakeTokenProvider } from '@shared/container/providers/TokenProvider/fakes/FakeTokenProvider'
 
-let fakeUsersRepository: IUsersRepository;
-let fakeTokenUserRepository: IUsersTokenRepository;
-let fakeHashProvider: IHashProvider;
-let fakeDateProvider: IDateProvider;
-let authenticateUser: AuthenticateUserService;
+import { AuthenticateUserService } from '../services/AuthenticateUserService'
 
-describe("AuthenticateUser", () => {
+let fakeUsersRepository: FakeUsersRepository
+let fakeUsersTokenRepository: FakeUsersTokenRepository
+let fakeHashProvider: FakeHashProvider
+let fakeDateProvider: FakeDateProvider
+let fakeTokenProvider: FakeTokenProvider
+let authenticateUserService: AuthenticateUserService
+
+describe('AuthenticateUser', () => {
   beforeEach(() => {
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeTokenUserRepository = new FakeUsersTokenRepository();
-    fakeHashProvider = new FakeHashProvider();
-    fakeDateProvider = new FakeDateProvider();
+    fakeUsersRepository = new FakeUsersRepository()
+    fakeUsersTokenRepository = new FakeUsersTokenRepository()
+    fakeHashProvider = new FakeHashProvider()
+    fakeDateProvider = new FakeDateProvider()
+    fakeTokenProvider = new FakeTokenProvider()
 
-    authenticateUser = new AuthenticateUserService(
+    authenticateUserService = new AuthenticateUserService(
       fakeUsersRepository,
-      fakeTokenUserRepository,
+      fakeUsersTokenRepository,
       fakeHashProvider,
-      fakeDateProvider
-    );
+      fakeDateProvider,
+      fakeTokenProvider
+    )
+  })
 
-  });
-
-  it("should be able authenticate", async () => {
+  it('should be able authenticate a user', async () => {
     const user = await fakeUsersRepository.create({
-      name: "John Doe",
-      email: "john.doe@example.com",
-      password: "123456"
-    });
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+      password: '123456',
+    })
 
-    const response = await authenticateUser.execute({
+    const response = await authenticateUserService.execute({
       email: user.email,
-      password: user.password
-    });
+      password: user.password,
+    })
 
-    expect(response).toHaveProperty("token");
-  });
+    expect(response).toHaveProperty('token')
+    expect(response).toHaveProperty('refresh_token')
+    expect(response.user.email).toBe(user.email)
 
-  it("should not be able to authenticate with non existing user", async () => {
+    const userToken = await fakeUsersTokenRepository.findByRefreshToken(
+      response.refresh_token
+    )
+
+    expect(userToken).toBeTruthy()
+    expect(userToken?.user_id).toBe(user.id)
+  })
+
+  it('should not be able to authenticate with non-existing user', async () => {
     await expect(
-      authenticateUser.execute({
-        email: "joh.doe@example.com",
-        password: "123456"
+      authenticateUserService.execute({
+        email: 'joh.doe@example.com',
+        password: '123456',
       })
-    ).rejects.toBeInstanceOf(AppError);
-  });
+    ).rejects.toBeInstanceOf(AppError)
+  })
 
-  it("should not be able authenticate with incorrect password", async () => {
+  it('should not be able authenticate with incorrect password', async () => {
     const user = await fakeUsersRepository.create({
-      name: "John Doe",
-      email: "john.doe@example.com",
-      password: "123456"
-    });
+      name: 'John Doe',
+      email: 'john.doe@example.com',
+      password: '123456',
+    })
 
     await expect(
-      authenticateUser.execute({
+      authenticateUserService.execute({
         email: user.email,
-        password: "wrong-password"
+        password: 'wrong-password',
       })
-    ).rejects.toBeInstanceOf(AppError);
-  });
-});
+    ).rejects.toBeInstanceOf(AppError)
+  })
+})
