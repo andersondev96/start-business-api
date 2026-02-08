@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { AppError } from '@shared/errors/AppError'
 
-import { FakeUsersRepository } from '../repositories/Fakes/FakeUsersRepository'
-import { FakeUsersTokenRepository } from '../repositories/Fakes/FakeUsersTokenRepository'
-import { FakeHashProvider } from '../providers/HashProvider/Fakes/FakeHashProvider'
-import { FakeDateProvider } from '../../../shared/container/providers/DateProvider/Fakes/FakeDateProvider'
+import { FakeUsersRepository } from '../../repositories/Fakes/FakeUsersRepository'
+import { FakeUsersTokenRepository } from '../../repositories/Fakes/FakeUsersTokenRepository'
+import { FakeHashProvider } from '../../providers/HashProvider/Fakes/FakeHashProvider'
+import { FakeDateProvider } from '../../../../shared/container/providers/DateProvider/Fakes/FakeDateProvider'
 import { FakeTokenProvider } from '@shared/container/providers/TokenProvider/fakes/FakeTokenProvider'
 
-import { AuthenticateUserService } from '../services/AuthenticateUserService'
+import { AuthenticateUserService } from '../AuthenticateUserService'
 
 let fakeUsersRepository: FakeUsersRepository
 let fakeUsersTokenRepository: FakeUsersTokenRepository

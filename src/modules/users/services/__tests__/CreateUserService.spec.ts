@@ -2,9 +2,9 @@ import { FakeEntrepreneursRepository } from '@modules/entrepreneurs/repositories
 import { FakeEntrepreneursSettingsRepository } from '@modules/entrepreneurs/repositories/Fakes/FakeEntrepreneursSettingsRepository'
 import { AppError } from '@shared/errors/AppError'
 
-import { FakeHashProvider } from '../providers/HashProvider/Fakes/FakeHashProvider'
-import { FakeUsersRepository } from '../repositories/Fakes/FakeUsersRepository'
-import { CreateUserService } from '../services/CreateUserService'
+import { FakeHashProvider } from '../../providers/HashProvider/Fakes/FakeHashProvider'
+import { FakeUsersRepository } from '../../repositories/Fakes/FakeUsersRepository'
+import { CreateUserService } from '../CreateUserService'
 
 let fakeUsersRepository: FakeUsersRepository
 let fakeEntrepreneurRepository: FakeEntrepreneursRepository
