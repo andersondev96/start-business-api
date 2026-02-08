@@ -10,5 +10,8 @@ describe('UsersRepository', () => {
       email: 'test@example.com',
       password: '123',
     })
+
+    expect(user).toHaveProperty('id')
+    expect(user.email).toBe('test@example.com')
   })
 })

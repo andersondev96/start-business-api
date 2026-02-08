@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../../../database/test-client'
+import { PrismaClient } from '../../../../../database/test-client'
 
 export class UsersRepositoryTest {
   constructor(private prisma: PrismaClient) {}
