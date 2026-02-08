@@ -9,12 +9,12 @@ export class FakeUsersRepository implements IUsersRepository {
 
   public async findById(id: string): Promise<User | null> {
     const findUserById = this.users.find((user) => user.id === id)
-    return findUserById || null
+    return findUserById ? { ...findUserById } : null
   }
 
   public async findByMail(email: string): Promise<User | null> {
     const findUser = this.users.find((user) => user.email === email)
-    return findUser || null
+    return findUser ? { ...findUser } : null
   }
 
   public async create(data: ICreateUserDTO): Promise<User> {
@@ -28,13 +28,17 @@ export class FakeUsersRepository implements IUsersRepository {
     } as User
 
     this.users.push(user)
-    return user
+    return { ...user }
   }
 
   public async update(data: IUpdateUserDTO): Promise<User> {
     const findIndex = this.users.findIndex(
       (findUser) => findUser.id === data.id
     )
+
+    if (findIndex === -1) {
+      throw new Error(`User with id ${data.id} not found`)
+    }
 
     const user = this.users[findIndex]
 
@@ -46,7 +50,7 @@ export class FakeUsersRepository implements IUsersRepository {
 
     this.users[findIndex] = updatedUser
 
-    return updatedUser
+    return { ...updatedUser }
   }
 
   public async addFavorite(user_id: string, favorite: string): Promise<User> {
@@ -64,7 +68,7 @@ export class FakeUsersRepository implements IUsersRepository {
 
     this.users[findIndex] = updatedUser
 
-    return updatedUser
+    return { ...updatedUser }
   }
 
   public async delete(id: string): Promise<void> {
