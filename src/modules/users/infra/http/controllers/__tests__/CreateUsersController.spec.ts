@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import fastify, { FastifyInstance } from 'fastify'
 import { container } from 'tsyringe'
-import { CreateUsersController } from '../infra/http/controllers/CreateUsersController'
+import { CreateUsersController } from '../CreateUsersController'
 import { ZodError } from 'zod'
 
 vi.mock('@modules/users/services/CreateUserService')

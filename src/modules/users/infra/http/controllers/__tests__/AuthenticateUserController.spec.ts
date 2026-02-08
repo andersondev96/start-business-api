@@ -4,7 +4,7 @@ import fastify, { FastifyInstance } from 'fastify'
 import { container } from 'tsyringe'
 import { ZodError } from 'zod'
 
-import { AuthenticateUserController } from '../infra/http/controllers/AuthenticateUserController'
+import { AuthenticateUserController } from '../AuthenticateUserController'
 import { AppError } from '@shared/errors/AppError'
 
 vi.mock('@modules/users/services/AuthenticateUserService')
