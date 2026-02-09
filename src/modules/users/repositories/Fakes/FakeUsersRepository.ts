@@ -53,24 +53,6 @@ export class FakeUsersRepository implements IUsersRepository {
     return { ...updatedUser }
   }
 
-  public async addFavorite(user_id: string, favorite: string): Promise<User> {
-    const findIndex = this.users.findIndex((user) => user.id === user_id)
-    const user = this.users[findIndex]
-
-    if (!user) {
-      throw new Error(`User with id ${user_id} not found`)
-    }
-
-    const updatedUser = {
-      ...user,
-      favorites: [...(user.favorites || []), favorite],
-    }
-
-    this.users[findIndex] = updatedUser
-
-    return { ...updatedUser }
-  }
-
   public async delete(id: string): Promise<void> {
     const index = this.users.findIndex((user) => user.id === id)
 

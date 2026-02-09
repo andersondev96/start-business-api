@@ -8,14 +8,6 @@ import { UserMap } from '@modules/users/mapper/UserMap'
 export class UsersRepository implements IUsersRepository {
   constructor(private prisma: PrismaClient) {}
 
-  async findById(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: {
-        id,
-      },
-    })
-  }
-
   async create(data: ICreateUserDTO): Promise<User> {
     return this.prisma.user.create({
       data: {
@@ -23,6 +15,14 @@ export class UsersRepository implements IUsersRepository {
         email: data.email,
         password: data.password,
         avatar: data.avatar ?? null,
+      },
+    })
+  }
+
+  async findById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: {
+        id,
       },
     })
   }
@@ -35,19 +35,6 @@ export class UsersRepository implements IUsersRepository {
     })
 
     return user
-  }
-
-  public async addFavorite(userId: string, favorite: string): Promise<User> {
-    const user = await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        favorites: {
-          push: favorite,
-        },
-      },
-    })
-
-    return UserMap.toDomain(user)
   }
 
   async update(data: IUpdateUserDTO): Promise<User> {
