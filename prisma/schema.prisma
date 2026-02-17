@@ -6,6 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  ADMIN
+  ENTREPRENEUR
+  CUSTOMER
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -15,27 +21,32 @@ model User {
   updatedAt DateTime @updatedAt
   avatar    String?
 
+  role Role @default(CUSTOMER)
+
   userToken          UserToken[]
-  Company            Company?
+  Entrepreneur       Entrepreneur?
   Customer           Customer?
-  Entrepreneur       Entrepreneur[]
   Assessment         Assessment[]
   Connection_Socket  Connection_Socket[]
   favorite_companies FavoriteCompany[]
   favorite_services  FavoriteService[]
 
+  // Company            Company?
+
   @@map("users")
 }
 
 model Entrepreneur {
-  id                    String                 @id @default(uuid())
-  user_id               String                 @unique
-  user                  User                   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  company_id            String?                @unique
-  company               Company?               @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @default(now())
+  id      String @id @default(uuid())
+  user_id String @unique
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  company Company?
+
   entrepreneur_settings Entrepreneur_Settings?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 
   @@map("entrepreneurs")
 }
@@ -44,40 +55,42 @@ model UserToken {
   id            String   @id @default(uuid())
   expires_date  DateTime
   refresh_token String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
   user_id       String
   user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("userTokens")
 }
 
 model Company {
-  id                    String             @id @default(uuid())
-  name                  String             @unique
+  id                    String  @id @default(uuid())
+  name                  String  @unique
   cnpj                  String?
-  category_id           String
-  category              Category           @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   description           String?
-  services              String[]
   physical_localization Boolean
-  stars                 Int?               @default(0)
-  favorites             Int?               @default(0)
-  user_id               String             @unique
-  user                  User               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Service               Service[]
-  contact               Contact            @relation(fields: [contact_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  contact_id            String             @unique
-  Schedule              Schedule[]
-  Address               Address?
-  ImageCompany          ImageCompany[]
-  Entrepreneur          Entrepreneur[]
-  proposals             Proposal[]
-  budgets               Budget[]
-  customer_company      Customer_Company[]
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
-  favorited_by          FavoriteCompany[]
+  stars                 Int?    @default(0)
+  favorites             Int?    @default(0)
+
+  category_id String
+  category    Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+
+  entrepreneur_id String       @unique
+  entrepreneur    Entrepreneur @relation(fields: [entrepreneur_id], references: [id], onDelete: Cascade)
+
+  services Service[]
+  contact  Contact?
+
+  scheduls         Schedule[]
+  address          Address?
+  images           ImageCompany[]
+  proposals        Proposal[]
+  budgets          Budget[]
+  customer_company Customer_Company[]
+  favorited_by     FavoriteCompany[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("companies")
 }
@@ -96,14 +109,17 @@ model Assessment {
 }
 
 model Contact {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   telephone String
   whatsapp  String?
   email     String
   website   String?
+
+  company_id String  @unique
+  company    Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  company   Company?
 
   @@map("contacts")
 }
@@ -123,17 +139,18 @@ model Schedule {
 }
 
 model Address {
-  id         String  @id @default(uuid())
-  cep        String? @default("")
-  street     String? @default("")
-  district   String? @default("")
-  number     Int?
-  state      String
-  city       String
-  latitude   Float
-  longitude  Float
-  company    Company @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id        String  @id @default(uuid())
+  cep       String? @default("")
+  street    String? @default("")
+  district  String? @default("")
+  number    Int?
+  state     String
+  city      String
+  latitude  Float
+  longitude Float
+
   company_id String  @unique
+  company    Company @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -155,21 +172,24 @@ model ImageCompany {
 }
 
 model Service {
-  id                String            @id @default(uuid())
+  id                String   @id @default(uuid())
   name              String
   description       String
   price             Float
   category          String
   image_url         String?
-  highlight_service Boolean?          @default(false)
-  favorites         Int?              @default(0)
-  stars             Int?              @default(0)
-  assessments       Int?              @default(0)
-  company_id        String
-  company           Company           @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  favorited_by      FavoriteService[]
+  highlight_service Boolean? @default(false)
+  favorites         Int?     @default(0)
+  stars             Int?     @default(0)
+  assessments       Int?     @default(0)
+
+  company_id String
+  company    Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  favorited_by FavoriteService[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("services")
 }
@@ -247,16 +267,19 @@ model Budget {
 }
 
 model Customer {
-  id               String             @id @default(uuid())
-  user_id          String             @unique
-  user             User               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  telephone        String?
-  status           String?
+  id      String @id @default(uuid())
+  user_id String @unique
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  telephone String?
+  status    String?
+
   proposal         Proposal[]
   budget           Budget[]
   customer_company Customer_Company[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("customers")
 }
@@ -274,16 +297,18 @@ model Customer_Company {
 }
 
 model Entrepreneur_Settings {
-  id                          String       @id @default(uuid())
-  entrepreneur_id             String       @unique
+  id              String       @id @default(uuid())
+  entrepreneur_id String       @unique
+  entrepreneur    Entrepreneur @relation(fields: [entrepreneur_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
   company_logo                String?
-  highlight_services_quantity Int?         @default(3)
-  online_budget               Boolean?     @default(false)
-  online_chat                 Boolean?     @default(false)
-  email_notification          Boolean?     @default(false)
-  createdAt                   DateTime     @default(now())
-  updatedAt                   DateTime     @updatedAt
-  entrepreneur                Entrepreneur @relation(fields: [entrepreneur_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  highlight_services_quantity Int?     @default(3)
+  online_budget               Boolean? @default(false)
+  online_chat                 Boolean? @default(false)
+  email_notification          Boolean? @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("entrepreneurs_settings")
 }
