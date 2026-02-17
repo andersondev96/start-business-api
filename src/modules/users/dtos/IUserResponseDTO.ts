@@ -3,6 +3,5 @@ export interface IUserResponseDTO {
   name: string
   email: string
   avatar: string | null
-  favorites?: string[]
   createdAt: Date
 }

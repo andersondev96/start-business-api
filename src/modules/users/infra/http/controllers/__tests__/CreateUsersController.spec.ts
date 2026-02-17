@@ -46,7 +46,6 @@ describe('CreateUsersController', () => {
       name: 'John Doe',
       email: 'john@example.com',
       avatar: null,
-      favorites: [],
       createdAt: new Date(),
     }
 

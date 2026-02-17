@@ -21,7 +21,6 @@ export class FakeUsersRepository implements IUsersRepository {
     const user: User = {
       ...data,
       id: uuid(),
-      favorites: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: data.avatar ?? null,

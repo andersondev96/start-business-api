@@ -3,7 +3,6 @@ export class User {
   name: string
   email: string
   password: string
-  favorites?: string[]
   avatar?: string
   createdAt?: Date
   updatedAt?: Date

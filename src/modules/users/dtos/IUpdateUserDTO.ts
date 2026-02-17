@@ -4,5 +4,4 @@ export interface IUpdateUserDTO {
   email?: string
   password?: string
   avatar?: string | null
-  favorites?: string[]
 }

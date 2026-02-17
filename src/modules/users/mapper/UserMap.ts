@@ -9,7 +9,6 @@ export class UserMap {
       name: raw.name,
       email: raw.email,
       password: raw.password,
-      favorites: raw.favorites,
       avatar: raw.avatar,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
@@ -22,7 +21,6 @@ export class UserMap {
       name: user.name,
       email: user.email,
       avatar: user.avatar ?? null,
-      favorites: user.favorites ?? [],
       createdAt: user.createdAt!,
     }
   }
