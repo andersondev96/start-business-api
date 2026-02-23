@@ -1,10 +1,9 @@
 import { AppError } from '@shared/errors/AppError'
 
 import { FakeUsersRepository } from '../../repositories/Fakes/FakeUsersRepository'
-import { IUsersRepository } from '../../repositories/IUsersRepository'
 import { DeleteUserService } from '../DeleteUserService'
 
-let fakeUsersRepository: IUsersRepository
+let fakeUsersRepository: FakeUsersRepository
 let deleteUserService: DeleteUserService
 
 describe('DeleteUserService', () => {
@@ -22,9 +21,9 @@ describe('DeleteUserService', () => {
 
     await deleteUserService.execute(user.id)
 
-    const findUser = await fakeUsersRepository.findById(user.id)
+    const findUser = await fakeUsersRepository.findById(user.id!)
 
-    expect(findUser).toBe(undefined)
+    expect(findUser).toBeNull()
   })
 
   it('Should not be able to delete a invalid user', async () => {
