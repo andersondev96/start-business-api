@@ -58,7 +58,7 @@ describe('CreateUsersController', () => {
         name: 'John Doe',
         email: 'john@example.com',
         password: 'password123',
-        isEntrepreneur: false,
+        role: 'ENTREPRENEUR',
       },
     })
 
@@ -74,7 +74,7 @@ describe('CreateUsersController', () => {
       name: 'John Doe',
       email: 'john@example.com',
       password: 'password123',
-      isEntrepreneur: false,
+      role: 'ENTREPRENEUR',
     })
   })
 
@@ -107,7 +107,22 @@ describe('CreateUsersController', () => {
     expect(response.statusCode).toBe(400)
   })
 
-  it('should pass "isEntrepreneur" default value as false if not provided', async () => {
+  it('should return 400 if an invalid role is provided', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/users',
+      payload: {
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'password123',
+        role: 'INVALID_ROLE',
+      },
+    })
+
+    expect(response.statusCode).toBe(400)
+  })
+
+  it('should pass "role" default value as CUSTOMER if not provided', async () => {
     createUserServiceMock.execute.mockResolvedValue({})
 
     await app.inject({
@@ -122,7 +137,7 @@ describe('CreateUsersController', () => {
 
     expect(createUserServiceMock.execute).toHaveBeenCalledWith(
       expect.objectContaining({
-        isEntrepreneur: false,
+        role: 'CUSTOMER',
       })
     )
   })

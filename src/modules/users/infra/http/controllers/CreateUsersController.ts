@@ -11,7 +11,7 @@ const createUserBodySchema = z.object({
   password: z
     .string({ required_error: 'Password is required' })
     .min(8, 'Password must be at least 8 chars'),
-  isEntrepreneur: z.boolean().default(false),
+  role: z.enum(['ADMIN', 'ENTREPRENEUR', 'CUSTOMER']).default('CUSTOMER'),
 })
 
 export class CreateUsersController {
@@ -19,8 +19,9 @@ export class CreateUsersController {
     request: FastifyRequest,
     response: FastifyReply
   ): Promise<FastifyReply> {
-    const { name, email, password, isEntrepreneur } =
-      createUserBodySchema.parse(request.body)
+    const { name, email, password, role } = createUserBodySchema.parse(
+      request.body
+    )
 
     const createUserService = container.resolve(CreateUserService)
 
@@ -28,7 +29,7 @@ export class CreateUsersController {
       name,
       email,
       password,
-      isEntrepreneur,
+      role,
     })
 
     return response.status(201).send(user)

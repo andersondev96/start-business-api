@@ -10,7 +10,7 @@ interface IRequest {
   name: string
   email: string
   password: string
-  isEntrepreneur?: boolean
+  role?: 'ADMIN' | 'ENTREPRENEUR' | 'CUSTOMER'
 }
 
 type IResponse = ReturnType<typeof UserMap.toDTO>
@@ -35,7 +35,7 @@ export class CreateUserService {
     name,
     email,
     password,
-    isEntrepreneur,
+    role = 'CUSTOMER',
   }: IRequest): Promise<IResponse> {
     const userAlreadyExists = await this.userRepository.findByMail(email)
 
@@ -49,9 +49,10 @@ export class CreateUserService {
       name,
       email,
       password: hashedPassword,
+      role,
     })
 
-    if (isEntrepreneur) {
+    if (role === 'ENTREPRENEUR') {
       await this.createEntrepreneurProfile(user.id!)
     }
 

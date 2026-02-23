@@ -1,9 +1,14 @@
+export type Role = 'ADMIN' | 'ENTREPRENEUR' | 'CUSTOMER'
+
 export class User {
   id?: string
   name: string
   email: string
   password: string
-  avatar?: string
+  avatar?: string | null
+
+  role?: Role
+
   createdAt?: Date
   updatedAt?: Date
 
@@ -12,6 +17,11 @@ export class User {
     id?: string
   ) {
     Object.assign(this, props)
+
+    if (!this.role) {
+      this.role = 'CUSTOMER'
+    }
+
     if (id) this.id = id
   }
 }

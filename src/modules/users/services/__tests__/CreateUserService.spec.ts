@@ -33,7 +33,7 @@ describe('CreateUserService', () => {
       name: 'John Doe',
       email: 'john@example.com',
       password: '123456',
-      isEntrepreneur: false,
+      role: 'CUSTOMER',
     })
 
     expect(user).toHaveProperty('id')
@@ -42,12 +42,12 @@ describe('CreateUserService', () => {
     expect(user).not.toHaveProperty('password')
   })
 
-  it('should be able to create a new user with entrepreneur profile', async () => {
+  it('should be able to create a new user with role entrepreneur', async () => {
     const user = await createUserService.execute({
       name: 'Elon Musk',
       email: 'elon@tesla.com',
       password: 'mars_mission',
-      isEntrepreneur: true,
+      role: 'ENTREPRENEUR',
     })
 
     expect(user).toHaveProperty('id')
