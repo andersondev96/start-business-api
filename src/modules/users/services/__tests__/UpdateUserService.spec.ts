@@ -1,14 +1,11 @@
 import { AppError } from '@shared/errors/AppError'
 
-import { ICreateUserDTO } from '../../dtos/ICreateUserDTO'
 import { FakeHashProvider } from '../../providers/HashProvider/Fakes/FakeHashProvider'
-import { IHashProvider } from '../../providers/HashProvider/models/IHashProvider'
 import { FakeUsersRepository } from '../../repositories/Fakes/FakeUsersRepository'
-import { IUsersRepository } from '../../repositories/IUsersRepository'
 import { UpdateUserService } from '../UpdateUserService'
 
-let fakeUsersRepository: IUsersRepository
-let fakeHashProvider: IHashProvider
+let fakeUsersRepository: FakeUsersRepository
+let fakeHashProvider: FakeHashProvider
 let updateUserService: UpdateUserService
 
 describe('Update User Service', () => {
@@ -22,73 +19,71 @@ describe('Update User Service', () => {
   })
 
   it('Should be able to update a user', async () => {
-    const user: ICreateUserDTO = {
+    const userCreated = await fakeUsersRepository.create({
       name: 'John Doe',
       email: 'john.doe@example.com',
       password: '123456',
-    }
-    const userCreate = await fakeUsersRepository.create(user)
+    })
 
-    userCreate.name = 'John Doe Updated'
-    userCreate.email = 'john2@example.com'
-
-    const updatedUser = await updateUserService.execute(user)
+    const updatedUser = await updateUserService.execute({
+      id: userCreated.id as string,
+      name: 'John Doe Updated',
+      email: 'john2@example.com',
+    })
 
     expect(updatedUser).toHaveProperty('name', 'John Doe Updated')
     expect(updatedUser).toHaveProperty('email', 'john2@example.com')
   })
 
-  it('Should not be able to invalid update user', async () => {
-    const user: ICreateUserDTO = {
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      password: '123456',
-      id: 'invalid-id',
-    }
-
-    await expect(updateUserService.execute(user)).rejects.toBeInstanceOf(
-      AppError
-    )
+  it('Should not be able to update a non-existent user', async () => {
+    await expect(
+      updateUserService.execute({
+        id: 'invalid-id',
+        name: 'John Doe',
+        email: 'john.doe@example.com',
+      })
+    ).rejects.toBeInstanceOf(AppError)
   })
 
   it('Should be able update user if password not informed', async () => {
-    const user = {
+    const userCreated = await fakeUsersRepository.create({
       name: 'User 1',
       email: 'user1@example.com',
       password: '12345678',
-    }
+    })
 
-    const userCreated = await fakeUsersRepository.create(user)
-
-    const userUpdated = await updateUserService.execute({
-      id: userCreated.id,
+    await updateUserService.execute({
+      id: userCreated.id as string,
       name: 'New Name',
       email: 'userupdated@example.com',
     })
 
-    expect(userCreated.password).toEqual(userUpdated.password)
+    const userInDb = await fakeUsersRepository.findById(
+      userCreated.id as string
+    )
+
+    expect(userInDb?.password).toEqual(userCreated.password)
   })
 
   it('Should not be able update user if email already exists', async () => {
-    const user1: ICreateUserDTO = {
+    const user1Created = await fakeUsersRepository.create({
       name: 'User 1',
       email: 'user1@example.com',
       password: '123456',
-    }
+    })
 
-    const user2: ICreateUserDTO = {
+    const user2Created = await fakeUsersRepository.create({
       name: 'User 2',
       email: 'user2@example.com',
       password: '123456',
-    }
+    })
 
-    const user1Create = await fakeUsersRepository.create(user1)
-    const user2Create = await fakeUsersRepository.create(user2)
-
-    user2Create.email = user1Create.email
-
-    await expect(updateUserService.execute(user2)).rejects.toBeInstanceOf(
-      AppError
-    )
+    await expect(
+      updateUserService.execute({
+        id: user2Created.id as string,
+        name: 'User 2',
+        email: user1Created.email,
+      })
+    ).rejects.toEqual(new AppError('Email address already used'))
   })
 })

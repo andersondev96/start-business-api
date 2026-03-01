@@ -1,79 +1,58 @@
-import { Company } from "@modules/companies/infra/prisma/entities/Company";
-import { EntrepreneurSettings } from "@modules/entrepreneurs/infra/prisma/entities/EntrepreneurSettings";
-import { Budget } from "@modules/proposals/infra/prisma/entities/Budget";
-import { Service } from "@modules/services/infra/prisma/entities/Service";
-import { User } from "@modules/users/infra/prisma/entities/User";
+import { Company } from '@modules/companies/infra/prisma/entities/Company'
+import { EntrepreneurSettings } from '@modules/entrepreneurs/infra/prisma/entities/EntrepreneurSettings'
+import { Budget } from '@modules/proposals/infra/prisma/entities/Budget'
+import { Service } from '@modules/services/infra/prisma/entities/Service'
+import { User } from '@modules/users/infra/prisma/entities/User'
+import { env } from 'env'
 
-export function getUserAvatarUrl(objectWithImage: User, segment: string): string {
-
-  if (!objectWithImage.avatar) {
-    return undefined;
-  }
-
-  const baseUrl = process.env.disk === "local"
-    ? process.env.APP_API_URL
-    : process.env.AWS_BUCKET_URL;
-
-  return `${baseUrl}/${segment}/${objectWithImage.avatar}`;
+function getBaseUrl(): string {
+  return env.disk === 'local' ? env.APP_API_URL : env.AWS_BUCKET_URL
 }
 
-export function getCompanyImages(objectCompanyImages: Company, segment: string): string[] {
-
-  if (!objectCompanyImages.ImageCompany) {
-    return [];
+function buildUrl(
+  filename: string | null | undefined,
+  segment: string
+): string | null {
+  if (!filename || filename.trim() === '') {
+    return null
   }
-
-  const baseUrl = process.env.disk === "local"
-    ? process.env.APP_API_URL
-    : process.env.AWS_BUCKET_URL;
-
-  return objectCompanyImages.ImageCompany.map((file) => {
-    return file.image_name ?
-      `${baseUrl}/${segment}/${file.image_name}` : undefined;
-  }).filter(Boolean);
-
+  return `${getBaseUrl()}/${segment}/${filename}`
 }
 
-export function getServiceImageUrl(objectWithImage: Service, segment: string): string {
-
-  if (!objectWithImage.image_url) {
-    return undefined;
-  }
-
-  const baseUrl = process.env.disk === "local"
-    ? process.env.APP_API_URL
-    : process.env.AWS_BUCKET_URL;
-
-  return `${baseUrl}/${segment}/${objectWithImage.image_url}`;
+export function getUserAvatarUrl(user: User, segment: string): string | null {
+  return buildUrl(user.avatar, segment)
 }
 
-export function getBudgetFiles(objectWithFile: Budget, segment: string): string[] {
-
-  if (!objectWithFile.files) {
-    return [];
+export function getCompanyImages(company: Company, segment: string): string[] {
+  if (!company.ImageCompany) {
+    return []
   }
 
-  const baseUrl = process.env.disk === "local"
-    ? process.env.APP_API_URL
-    : process.env.AWS_BUCKET_URL;
-
-  return objectWithFile.files.map((file) => {
-    return file.length > 0 ?
-      `${baseUrl}/${segment}/${file}` : undefined;
-  }).filter(Boolean);
-
+  return company.ImageCompany.map((file) =>
+    buildUrl(file.image_name, segment)
+  ).filter((url): url is string => url !== null)
 }
 
-export function getCompanyLogo(objectLogoCompany: EntrepreneurSettings, segment: string): string {
+export function getServiceImageUrl(
+  service: Service,
+  segment: string
+): string | null {
+  return buildUrl(service.image_url, segment)
+}
 
-  if (!objectLogoCompany.company_logo) {
-    return undefined;
+export function getBudgetFiles(budget: Budget, segment: string): string[] {
+  if (!budget.files) {
+    return []
   }
 
-  const baseUrl = process.env.disk === "local"
-    ? process.env.APP_API_URL
-    : process.env.AWS_BUCKET_URL;
+  return budget.files
+    .map((file) => buildUrl(file, segment))
+    .filter((url): url is string => url !== null)
+}
 
-  return `${baseUrl}/${segment}/${objectLogoCompany.company_logo}`;
-
+export function getCompanyLogo(
+  settings: EntrepreneurSettings,
+  segment: string
+): string | null {
+  return buildUrl(settings.company_logo, segment)
 }

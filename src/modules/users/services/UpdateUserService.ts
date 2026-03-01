@@ -1,75 +1,65 @@
-import { inject, injectable } from "tsyringe";
+import { inject, injectable } from 'tsyringe'
 
-import { AppError } from "@shared/errors/AppError";
+import { AppError } from '@shared/errors/AppError'
+import { IUsersRepository } from '../repositories/IUsersRepository'
+import { IHashProvider } from '../providers/HashProvider/models/IHashProvider'
+import { IUserResponseDTO } from '../dtos/IUserResponseDTO'
+import { UserMap } from '../mapper/UserMap'
 
-import { getUserAvatarUrl } from "@shared/utils/getFilesUrl";
-import { User } from "../infra/prisma/entities/User";
-import { UsersRepository } from "../infra/prisma/repositories/UsersRepository";
-import { IHashProvider } from "../providers/HashProvider/models/IHashProvider";
+import { getUserAvatarUrl } from '@shared/utils/getFilesUrl'
 
 interface IRequest {
-  id?: string;
-  name: string;
-  email: string;
-  password?: string;
+  id: string
+  name: string
+  email: string
+  password?: string
 }
 
 @injectable()
 export class UpdateUserService {
   constructor(
-    @inject("UsersRepository")
-    private userRepository: UsersRepository,
+    @inject('UsersRepository')
+    private userRepository: IUsersRepository,
 
-    @inject("HashProvider")
+    @inject('HashProvider')
     private hashProvider: IHashProvider
-  ) { }
+  ) {}
 
-  public async execute({ id, name, email, password }: IRequest): Promise<User> {
-    const userExists = await this.userRepository.findById(id);
+  public async execute({
+    id,
+    name,
+    email,
+    password,
+  }: IRequest): Promise<IUserResponseDTO> {
+    const userExists = await this.userRepository.findById(id)
 
     if (!userExists) {
-      throw new AppError("User does not exits");
+      throw new AppError('User does not exist')
     }
 
-    const emailExists = await this.userRepository.findByMail(email);
+    if (email !== userExists.email) {
+      const emailExists = await this.userRepository.findByMail(email)
 
-    if (emailExists && emailExists.id !== id) {
-      throw new AppError("Email address already used");
+      if (emailExists && emailExists.id !== id) {
+        throw new AppError('Email address already used')
+      }
     }
 
-    if (!password) {
-      const user = await this.userRepository.update({
-        ...userExists,
-        name,
-        email,
-      });
-
-      return {
-        ...user,
-        avatar: user.avatar
-          ? `${process.env.disk === "local"
-            ? process.env.APP_API_URL
-            : process.env.AWS_BUCKET_URL}/avatar/${user.avatar}`
-          : null
-      };
-    }
-
-    const hashedPassword = await this.hashProvider.generateHash(password);
-
-    const user = await this.userRepository.update({
+    const updateData = {
       id,
       name,
       email,
-      password: hashedPassword,
-    });
+      password: userExists.password,
+    }
 
-    delete user.password;
+    if (password) {
+      updateData.password = await this.hashProvider.generateHash(password)
+    }
 
-    const returnUser = {
-      ...user,
-      avatar: getUserAvatarUrl(user, "avatar")
-    };
+    const updateUser = await this.userRepository.update(updateData)
 
-    return returnUser;
+    updateUser.avatar = getUserAvatarUrl(updateUser, 'avatar')
+
+    return UserMap.toDTO(updateUser)
   }
 }
