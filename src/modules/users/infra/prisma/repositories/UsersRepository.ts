@@ -20,11 +20,13 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         id,
       },
     })
+
+    return user ? UserMap.toDomain(user) : null
   }
 
   async findByMail(email: string): Promise<User | null> {
@@ -34,16 +36,18 @@ export class UsersRepository implements IUsersRepository {
       },
     })
 
-    return user
+    return user ? UserMap.toDomain(user) : null
   }
 
   async update(data: IUpdateUserDTO): Promise<User> {
     const { id, ...fields } = data
 
-    return this.prisma.user.update({
+    const user = await this.prisma.user.update({
       where: { id },
       data: { ...fields },
     })
+
+    return UserMap.toDomain(user)
   }
 
   async delete(id: string): Promise<void> {

@@ -1,13 +1,12 @@
 import { AppError } from '@shared/errors/AppError'
-
 import { FakeUsersRepository } from '../../repositories/Fakes/FakeUsersRepository'
 import { IUsersRepository } from '../../repositories/IUsersRepository'
-import { FindByUserIdService } from '../FindByUserIdService'
+import { FindByUserIdService } from '../FindUserByIdService'
 
 let fakeUsersRepository: IUsersRepository
 let findByUserIdService: FindByUserIdService
 
-describe('DeleteUserService', () => {
+describe('FindUserIdService', () => {
   beforeEach(() => {
     fakeUsersRepository = new FakeUsersRepository()
     findByUserIdService = new FindByUserIdService(fakeUsersRepository)
@@ -22,13 +21,15 @@ describe('DeleteUserService', () => {
 
     const findUser = await findByUserIdService.execute(user.id)
 
-    expect(findUser).toEqual({
-      avatar: undefined,
-      avatar_url: undefined,
-      email: 'john@example.com',
-      name: 'John Doe',
-      id: findUser.id,
-    })
+    expect(findUser).toEqual(
+      expect.objectContaining({
+        id: user.id,
+        name: 'John Doe',
+        email: 'john@example.com',
+        avatar: null,
+      })
+    )
+    expect(findUser).toHaveProperty('createdAt')
   })
 
   it('Should not be able find to invalid user', async () => {
