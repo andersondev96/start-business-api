@@ -1,25 +1,25 @@
 import { AppError } from '@shared/errors/AppError'
 import { FakeUsersRepository } from '../../repositories/Fakes/FakeUsersRepository'
 import { IUsersRepository } from '../../repositories/IUsersRepository'
-import { FindByUserIdService } from '../FindUserByIdService'
+import { FindUserByEmailService } from '../FindUserByEmailService'
 
 let fakeUsersRepository: IUsersRepository
-let findByUserIdService: FindByUserIdService
+let findUserByEmailService: FindUserByEmailService
 
-describe('FindUserIdService', () => {
+describe('FindUserByEmailService', () => {
   beforeEach(() => {
     fakeUsersRepository = new FakeUsersRepository()
-    findByUserIdService = new FindByUserIdService(fakeUsersRepository)
+    findUserByEmailService = new FindUserByEmailService(fakeUsersRepository)
   })
 
-  it('Should be able find to user', async () => {
+  it('Should be able to find user by email', async () => {
     const user = await fakeUsersRepository.create({
       name: 'John Doe',
       email: 'john@example.com',
       password: '123456',
     })
 
-    const findUser = await findByUserIdService.execute(user.id)
+    const findUser = await findUserByEmailService.execute('john@example.com')
 
     expect(findUser).toEqual(
       expect.objectContaining({
@@ -32,9 +32,9 @@ describe('FindUserIdService', () => {
     expect(findUser).toHaveProperty('createdAt')
   })
 
-  it('Should not be able find to invalid user', async () => {
+  it('Should not be able to find a user with a non-existent email', async () => {
     await expect(
-      findByUserIdService.execute('invalid-id')
+      findUserByEmailService.execute('invalid-email@test.com')
     ).rejects.toBeInstanceOf(AppError)
   })
 })

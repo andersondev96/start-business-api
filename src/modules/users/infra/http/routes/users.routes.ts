@@ -7,9 +7,7 @@ import { ensureAuthenticated } from '@shared/infra/http/middlewares/ensureAuthen
 import { CreateUsersController } from '../controllers/CreateUsersController'
 import { DeleteUserController } from '../controllers/DeleteUserController'
 import { FindUserByIdController } from '../controllers/FindUserByIdController'
-import { FindFavoriteController } from '../controllers/FindFavoriteController'
 import { FindUserByEmailController } from '../controllers/FindUserByEmailController'
-import { ListFavoritesController } from '../controllers/ListFavoritesController'
 import { UpdateUserAvatarController } from '../controllers/UpdateUserAvatarController'
 import { UpdateUserController } from '../controllers/UpdateUserController'
 
@@ -39,8 +37,6 @@ const updateUserController = new UpdateUserController()
 const deleteUserController = new DeleteUserController()
 const updateUserAvatarController = new UpdateUserAvatarController()
 const findUserByEntrepreneurController = new FindUserByEntrepreneurController()
-const listFavoritesController = new ListFavoritesController()
-const findFavoriteController = new FindFavoriteController()
 
 export async function usersRoutes(app: FastifyInstance) {
   app.post(
@@ -70,36 +66,31 @@ export async function usersRoutes(app: FastifyInstance) {
   )
 
   app.get('/email', findUserByEmailController.handle)
+
   app.get(
     '/profile',
     { onRequest: [ensureAuthenticated] },
     findByUserIdController.handle
   )
+
   app.get(
     '/entrepreneur',
     { onRequest: [ensureAuthenticated] },
     findUserByEntrepreneurController.handle
   )
-  app.get(
-    '/favorites',
-    { onRequest: [ensureAuthenticated] },
-    listFavoritesController.handle
-  )
-  app.get(
-    '/favorite/:table_id',
-    { onRequest: [ensureAuthenticated] },
-    findFavoriteController.handle
-  )
+
   app.delete(
     '/',
     { onRequest: [ensureAuthenticated] },
     deleteUserController.handle
   )
+
   app.put(
     '/',
     { onRequest: [ensureAuthenticated] },
     updateUserController.handle
   )
+
   app.patch(
     '/avatar',
     {

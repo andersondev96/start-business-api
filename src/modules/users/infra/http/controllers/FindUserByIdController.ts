@@ -19,6 +19,6 @@ export class FindUserByIdController {
 
     const user = await findUserByIdService.execute(id)
 
-    return reply.send(user)
+    return reply.status(200).send(user)
   }
 }
