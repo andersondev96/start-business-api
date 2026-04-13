@@ -4,20 +4,19 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "module": "commonjs",
-    "baseUrl": "./src",
     "outDir": "./dist",
     "paths": {
       "@modules/*": [
-        "modules/*"
+        "./src/modules/*"
       ],
       "@config/*": [
-        "config/*"
+        "./src/config/*"
       ],
       "@shared/*": [
-        "shared/*"
+        "./src/shared/*"
       ],
       "@database/*": [
-        "database/*"
+        "./src/database/*"
       ]
     },
     "resolveJsonModule": true,

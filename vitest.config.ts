@@ -8,5 +8,15 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./test/setup.ts'],
     watch: false,
+    fileParallelism: false,
+    isolate: false,
+    mockReset: true,
+    restoreMocks: true,
+    coverage: {
+      include: ['src/modules/**/services/*.ts'],
+      reporter: ['text-summary', 'lcov'],
+      reportsDirectory: 'coverage',
+      provider: 'v8',
+    },
   },
 })

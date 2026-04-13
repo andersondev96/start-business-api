@@ -7,7 +7,7 @@ Projeto desenvolvido como parte do Trabalho de Conclusão de Curso (TCC) do curs
 
 ## 📌 **Índice**
 
-- [📄  Sobre o Projeto](#-sobre-o-projeto)
+- [📄 Sobre o Projeto](#-sobre-o-projeto)
 - [🚀 Tecnologias Utilizadas](#-tecnologias-utilizadas)
 - [🔧 Requisitos do software](#-requisitos-do-software)
 - [📂 Banco de Dados](#-banco-de-dados)
@@ -24,6 +24,7 @@ Projeto desenvolvido como parte do Trabalho de Conclusão de Curso (TCC) do curs
 O projeto tem como objetivo auxiliar microempreendedores individuais (MEIs) por meio de um sistema que permite a divulgação de seus negócios e serviços, aproximando-os do público-alvo e ampliando seu alcance.
 
 > ### ⚠️ **Status do Projeto:**
+>
 > Em manutenção - Alguns recursos podem não estar funcionando corretamente.
 
 ---
@@ -39,38 +40,44 @@ O servidor foi desenvolvido em **TypeScript**, utilizando **Node.js**, **Postgre
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)](https://expressjs.com/pt-br/)
 [![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)](https://www.prisma.io/)
-[![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/pt-BR/)
+[![Vitest](https://img.shields.io/badge/-vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 
 ---
 
 ## 🔧 Requisitos do software
 
 ### Usuários
+
 - [x] Autenticação
 - [x] Cadastro e edição de usuários
 - [x] Recuperação de senha
 - [x] Exclusão de conta
 
 ### MEIs
+
 - [x] Cadastro e edição
 - [x] Listagem e avaliação
 - [x] Adição de imagens
 - [x] Favoritar MEIs
 
 ### Serviços
+
 - [x] Gerenciamento completo de serviços (criar, editar, listar, excluir, avaliar, favoritar)
 - [x] Filtro de serviços
 - [x] Upload de serviços via arquivo `.xlsx`
 
 ### Orçamentos
+
 - [x] Solicitação e gerenciamento de orçamentos
 - [x] Edição e envio de orçamentos
 - [x] Aceitação ou recusa de propostas
 
 ### Chat
+
 - [x] Acesso e envio de mensagens para empreendedores
 
 ### Configurações
+
 - [x] Atualização de preferências
 - [x] Remoção de conta
 
@@ -87,7 +94,9 @@ O banco de dados utilizado é o **PostgreSQL**. Abaixo está o diagrama ER:
 ## ⚙ Como Executar a Aplicação
 
 ### **Pré-requisitos**
+
 Antes de iniciar, certifique-se de ter:
+
 - [Node.js (versão LTS recomendada)](https://nodejs.org/en/)
 - NPM ou PNPM
 - [Docker](https://www.docker.com/)
@@ -95,26 +104,26 @@ Antes de iniciar, certifique-se de ter:
 ### **Passos para Execução**
 
 1. Clone o repositório:
-    ```sh
-    git clone https://github.com/andersondev96/start-business-api
-    ```
+   ```sh
+   git clone https://github.com/andersondev96/start-business-api
+   ```
 2. Acesse a pasta do projeto:
-    ```sh
-    cd start-business-api
-    ```
+   ```sh
+   cd start-business-api
+   ```
 3. Instale as dependências:
-    ```sh
-    npm install # ou pnpm install
-    ```
+   ```sh
+   npm install # ou pnpm install
+   ```
 4. Configure as variáveis de ambiente no arquivo `.env`
 5. Execute as migrations do Prisma:
-    ```sh
-    npx prisma migrate dev
-    ```
+   ```sh
+   npx prisma migrate dev
+   ```
 6. Inicie a aplicação:
-    ```sh
-    npm run dev # ou pnpm run dev
-    ```
+   ```sh
+   npm run dev # ou pnpm run dev
+   ```
 7. A API estará disponível em: [http://localhost:3333](http://localhost:3333).
 
 As **collections** para testes estão disponíveis no arquivo `insomnia-All_2023-10-15.json`.
@@ -122,17 +131,21 @@ As **collections** para testes estão disponíveis no arquivo `insomnia-All_2023
 ---
 
 ## 🧪 Testes
+
 Para rodar os testes automatizados:
+
 ```
 npm run test
 ```
-**Tecnologias utilizadas para os testes:** Jest.
+
+**Tecnologias utilizadas para os testes:** Vitest.
 
 ---
 
 ## 🌍 Deploy da Aplicação
 
 O deploy foi realizado na **AWS EC2** com as seguintes configurações:
+
 - Servidor: **Ubuntu**
 - Proxy Reverso: **Nginx**
 - Gerenciamento de processos: **PM2**
@@ -149,17 +162,17 @@ Você poderá realizar requisições HTTP, utilizando softwares como o [Insomnia
 
 1. Fork este repositório
 2. Crie uma branch para sua funcionalidade:
-    ```sh
-    git checkout -b minha-feature
-    ```
+   ```sh
+   git checkout -b minha-feature
+   ```
 3. Realize suas alterações e comite:
-    ```sh
-    git commit -m "feature: Minha nova funcionalidade"
-    ```
+   ```sh
+   git commit -m "feature: Minha nova funcionalidade"
+   ```
 4. Envie para o repositório remoto:
-    ```sh
-    git push origin minha-feature
-    ```
+   ```sh
+   git push origin minha-feature
+   ```
 5. Abra um **Pull Request**!
 
 ---
@@ -186,8 +199,7 @@ Este projeto está sob a licença [LICENSE](LICENSE).
 
 ---
 
-Feito com 💚 por **Anderson Fernandes** 👋 
+Feito com 💚 por **Anderson Fernandes** 👋
 [Entre em conanto](https://www.linkedin.com/in/anderson-fernandes96/)
 
 </div>
-
