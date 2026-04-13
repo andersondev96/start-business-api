@@ -36,7 +36,7 @@ describe('UsersRepository Integration', () => {
     it('should be able to find a user by ID', async () => {
       const createdUser = await usersRepository.create(makeUserBody())
 
-      const foundUser = await usersRepository.findById(createdUser.id!)
+      const foundUser = await usersRepository.findById(createdUser.id)
 
       expect(foundUser).toEqual(
         expect.objectContaining({
@@ -76,7 +76,7 @@ describe('UsersRepository Integration', () => {
       const createdUser = await usersRepository.create(makeUserBody())
 
       const updatedUser = await usersRepository.update({
-        id: createdUser.id!,
+        id: createdUser.id,
         name: 'New Name',
         email: 'new@email.com',
       })
@@ -101,9 +101,9 @@ describe('UsersRepository Integration', () => {
     it('should be able to delete user', async () => {
       const createdUser = await usersRepository.create(makeUserBody())
 
-      await usersRepository.delete(createdUser.id!)
+      await usersRepository.delete(createdUser.id)
 
-      const foundUser = await usersRepository.findById(createdUser.id!)
+      const foundUser = await usersRepository.findById(createdUser.id)
       expect(foundUser).toBeNull()
     })
 

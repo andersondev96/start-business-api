@@ -9,7 +9,7 @@ interface IPayload {
   sub: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export async function ensureAuthenticated(request: FastifyRequest, response: FastifyReply) {
 
   const authHeader = request.headers.authorization;

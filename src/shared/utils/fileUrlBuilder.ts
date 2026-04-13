@@ -18,6 +18,6 @@ export class FileUrlBuilder {
 
     return filenames
       .filter((file) => file && file.length > 0)
-      .map((file) => this.build(file, folder) as string)
+      .map((file) => this.build(file, folder))
   }
 }

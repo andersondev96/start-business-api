@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+.next/
+.git/
+.vscode/
+.env*
+coverage/
+tmp/
+*.lock
+*.log
+*.pem
+.DS_Store
+public/
+prisma/migrations/
+test/prisma/

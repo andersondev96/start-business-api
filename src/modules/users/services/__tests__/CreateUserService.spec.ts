@@ -53,7 +53,7 @@ describe('CreateUserService', () => {
     expect(user).toHaveProperty('id')
 
     const createdEntrepreneur = await fakeEntrepreneurRepository.findByUser(
-      user.id!
+      user.id
     )
 
     expect(createdEntrepreneur).toBeTruthy()

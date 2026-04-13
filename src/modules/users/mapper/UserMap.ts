@@ -11,7 +11,7 @@ export class UserMap {
         password: raw.password,
         avatar: raw.avatar,
       },
-      raw.id
+      raw.id,
     )
 
     return user
@@ -19,12 +19,12 @@ export class UserMap {
 
   static toDTO(user: User): IUserResponseDTO {
     return {
-      id: user.id as string,
+      id: user.id,
       name: user.name,
       email: user.email,
       avatar: user.avatar ?? null,
-      role: user.role as Role,
-      createdAt: user.createdAt!,
+      role: user.role,
+      createdAt: user.createdAt,
     }
   }
 }

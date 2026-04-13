@@ -26,7 +26,7 @@ describe('Update User Service', () => {
     })
 
     const updatedUser = await updateUserService.execute({
-      id: userCreated.id as string,
+      id: userCreated.id,
       name: 'John Doe Updated',
       email: 'john2@example.com',
     })
@@ -53,13 +53,13 @@ describe('Update User Service', () => {
     })
 
     await updateUserService.execute({
-      id: userCreated.id as string,
+      id: userCreated.id,
       name: 'New Name',
       email: 'userupdated@example.com',
     })
 
     const userInDb = await fakeUsersRepository.findById(
-      userCreated.id as string
+      userCreated.id
     )
 
     expect(userInDb?.password).toEqual(userCreated.password)
@@ -80,7 +80,7 @@ describe('Update User Service', () => {
 
     await expect(
       updateUserService.execute({
-        id: user2Created.id as string,
+        id: user2Created.id,
         name: 'User 2',
         email: user1Created.email,
       })

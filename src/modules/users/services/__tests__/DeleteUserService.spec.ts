@@ -21,7 +21,7 @@ describe('DeleteUserService', () => {
 
     await deleteUserService.execute(user.id)
 
-    const findUser = await fakeUsersRepository.findById(user.id!)
+    const findUser = await fakeUsersRepository.findById(user.id)
 
     expect(findUser).toBeNull()
   })

@@ -53,7 +53,7 @@ export class CreateUserService {
     })
 
     if (role === 'ENTREPRENEUR') {
-      await this.createEntrepreneurProfile(user.id!)
+      await this.createEntrepreneurProfile(user.id)
     }
 
     return UserMap.toDTO(user)

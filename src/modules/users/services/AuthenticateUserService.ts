@@ -54,9 +54,9 @@ export class AuthenticateUserService {
       throw new AppError('Incorrect email/password combination', 401)
     }
 
-    const token = this.tokenProvider.generateAccessToken(user.id!)
+    const token = this.tokenProvider.generateAccessToken(user.id)
     const refresh_token = this.tokenProvider.generateRefreshToken(
-      user.id!,
+      user.id,
       email
     )
 
