@@ -1,27 +1,34 @@
-import { FastifyRequest, FastifyReply } from "fastify";
-import { container } from "tsyringe";
-import { z } from "zod";
+import { FastifyRequest, FastifyReply } from 'fastify'
+import { container } from 'tsyringe'
+import { z } from 'zod'
 
-import { GoogleAuthenticationService } from "@modules/users/services/GoogleAuthenticationService";
+import { GoogleAuthenticationService } from '@modules/users/services/GoogleAuthenticationService'
+
+const googleAuthBodySchema = z.object({
+  name: z
+    .string({ required_error: 'Name is required' })
+    .min(1, { message: 'Name must not be empty' }),
+  email: z.string().email('Invalid email format'),
+  avatar: z.string().url('Invalid avatar URL').optional().or(z.literal('')),
+})
+
+type GoogleAuthBody = z.infer<typeof googleAuthBodySchema>
 
 export class GoogleAuthenticationController {
+  async handle(
+    request: FastifyRequest<{ Body: GoogleAuthBody }>,
+    reply: FastifyReply,
+  ): Promise<FastifyReply> {
+    const { name, email, avatar } = googleAuthBodySchema.parse(request.body)
 
-  public async handle(request: FastifyRequest, reply: FastifyReply) {
-    const googleAuthenticationParamsSchema = z.object({
-      name: z.string({ message: "Name is required" }).min(1, { message: "Name is required" }),
-      email: z.string().email("Invalid email format"),
-      avatar: z.string().url("Invalid URL format").optional()
-    });
-    const { name, email, avatar } = googleAuthenticationParamsSchema.parse(request.body);
-
-    const googleAuthenticationService = container.resolve(GoogleAuthenticationService);
+    const googleAuthenticationService = container.resolve(GoogleAuthenticationService)
 
     const auth = await googleAuthenticationService.execute({
       name,
       email,
-      avatar
-    });
+      avatar: avatar || undefined,
+    })
 
-    return reply.status(201).send(auth);
+    return reply.status(201).send(auth)
   }
 }
