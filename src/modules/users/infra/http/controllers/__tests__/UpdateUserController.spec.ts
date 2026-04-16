@@ -44,22 +44,10 @@ describe('UpdateUserController', () => {
     vi.spyOn(container, 'resolve').mockReturnValue(updateUserServiceMock as never)
 
     controller = new UpdateUserController()
+
     app = fastify()
 
-    app.decorateRequest('userHolder')
-    app.decorateRequest('user', {
-      getter() {
-        if (!this.userHolder) {
-          this.userHolder = { id: '' }
-        }
-
-        return this.userHolder
-      },
-      setter(value: { id: string }) {
-        this.userHolder = value
-      },
-    })
-
+    app.decorateRequest('user', undefined as any)
     app.addHook('onRequest', async (request) => {
       const testUserId = request.headers['x-test-user-id'] as string | undefined
 

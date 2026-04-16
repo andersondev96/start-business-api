@@ -23,7 +23,7 @@ describe('FindUserByIdController', () => {
 
     app = fastify()
 
-    app.decorateRequest('user', null)
+    app.decorateRequest('user', undefined as any)
     app.addHook('onRequest', async (request) => {
       const testUserId = request.headers['x-test-user-id'] as string
       if (testUserId) {
@@ -45,10 +45,7 @@ describe('FindUserByIdController', () => {
 
     findUserByIdController = new FindUserByIdController()
 
-    app.get(
-      '/users',
-      findUserByIdController.handle.bind(findUserByIdController)
-    )
+    app.get('/users', findUserByIdController.handle.bind(findUserByIdController))
 
     await app.ready()
   })

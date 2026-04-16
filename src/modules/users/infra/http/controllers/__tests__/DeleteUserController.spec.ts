@@ -23,7 +23,7 @@ describe('DeleteUserController', () => {
 
     app = fastify()
 
-    app.decorateRequest('user', null)
+    app.decorateRequest('user', undefined as any)
     app.addHook('onRequest', async (request) => {
       const testUserId = request.headers['x-test-user-id'] as string
       if (testUserId) {
