@@ -8,11 +8,11 @@ import { IUsersRepository } from '../repositories/IUsersRepository'
 export class FindUserByEmailService {
   constructor(
     @inject('UsersRepository')
-    private usersRepository: IUsersRepository
+    private usersRepository: IUsersRepository,
   ) {}
 
   public async execute(email: string): Promise<IUserResponseDTO> {
-    const user = await this.usersRepository.findByMail(email)
+    const user = await this.usersRepository.findByEmail(email)
 
     if (!user) {
       throw new AppError('User does not exists')

@@ -5,7 +5,7 @@ import { User } from '../infra/prisma/entities/User'
 export interface IUsersRepository {
   create(data: ICreateUserDTO): Promise<User>
   findById(id: string): Promise<User | null>
-  findByMail(email: string): Promise<User | null>
+  findByEmail(email: string): Promise<User | null>
   update(user: IUpdateUserDTO): Promise<User>
   delete(id: string): Promise<void>
 }

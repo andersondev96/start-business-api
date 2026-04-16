@@ -36,32 +36,26 @@ export class AuthenticateUserService {
     @inject('DayjsDateProvider')
     private dateProvider: IDateProvider,
     @inject('TokenProvider')
-    private tokenProvider: ITokenProvider
+    private tokenProvider: ITokenProvider,
   ) {}
   public async execute({ email, password }: IRequest): Promise<IResponse> {
-    const user = await this.usersRepository.findByMail(email)
+    const user = await this.usersRepository.findByEmail(email)
 
     if (!user) {
       throw new AppError('Incorrect email/password combination', 401)
     }
 
-    const passwordMatched = await this.hashProvider.compareHash(
-      password,
-      user.password
-    )
+    const passwordMatched = await this.hashProvider.compareHash(password, user.password)
 
     if (!passwordMatched) {
       throw new AppError('Incorrect email/password combination', 401)
     }
 
     const token = this.tokenProvider.generateAccessToken(user.id)
-    const refresh_token = this.tokenProvider.generateRefreshToken(
-      user.id,
-      email
-    )
+    const refresh_token = this.tokenProvider.generateRefreshToken(user.id, email)
 
     const refresh_token_expires_date = this.dateProvider.addDays(
-      authConfig.expires_refresh_token_days
+      authConfig.expires_refresh_token_days,
     )
 
     await this.usersTokenRepository.create({

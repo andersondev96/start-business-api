@@ -12,15 +12,16 @@ export class FakeUsersRepository implements IUsersRepository {
     return findUserById ? { ...findUserById } : null
   }
 
-  public async findByMail(email: string): Promise<User | null> {
+  public async findByEmail(email: string): Promise<User | null> {
     const findUser = this.users.find((user) => user.email === email)
     return findUser ? { ...findUser } : null
   }
 
   public async create(data: ICreateUserDTO): Promise<User> {
+    const userId = uuid()
     const user: User = {
+      id: userId,
       ...data,
-      id: uuid(),
       createdAt: new Date(),
       updatedAt: new Date(),
       avatar: data.avatar ?? null,
@@ -31,9 +32,7 @@ export class FakeUsersRepository implements IUsersRepository {
   }
 
   public async update(data: IUpdateUserDTO): Promise<User> {
-    const findIndex = this.users.findIndex(
-      (findUser) => findUser.id === data.id
-    )
+    const findIndex = this.users.findIndex((findUser) => findUser.id === data.id)
 
     if (findIndex === -1) {
       throw new Error(`User with id ${data.id} not found`)
@@ -44,6 +43,7 @@ export class FakeUsersRepository implements IUsersRepository {
     const updatedUser: User = {
       ...user,
       ...data,
+      password: data.password ?? user.password,
       updatedAt: new Date(),
     }
 

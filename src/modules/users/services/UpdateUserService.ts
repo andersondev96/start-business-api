@@ -7,6 +7,7 @@ import { IUserResponseDTO } from '../dtos/IUserResponseDTO'
 import { UserMap } from '../mapper/UserMap'
 
 import { getUserAvatarUrl } from '@shared/utils/getFilesUrl'
+import type { IUpdateUserDTO } from '../dtos/IUpdateUserDTO'
 
 interface IRequest {
   id: string
@@ -19,47 +20,40 @@ interface IRequest {
 export class UpdateUserService {
   constructor(
     @inject('UsersRepository')
-    private userRepository: IUsersRepository,
+    private usersRepository: IUsersRepository,
 
     @inject('HashProvider')
-    private hashProvider: IHashProvider
+    private hashProvider: IHashProvider,
   ) {}
 
-  public async execute({
-    id,
-    name,
-    email,
-    password,
-  }: IRequest): Promise<IUserResponseDTO> {
-    const userExists = await this.userRepository.findById(id)
+  public async execute({ id, name, email, password }: IRequest): Promise<IUserResponseDTO> {
+    const user = await this.usersRepository.findById(id)
 
-    if (!userExists) {
+    if (!user) {
       throw new AppError('User does not exist')
     }
 
-    if (email !== userExists.email) {
-      const emailExists = await this.userRepository.findByMail(email)
+    if (email !== user.email) {
+      const emailAlreadyUsed = await this.usersRepository.findByEmail(email)
 
-      if (emailExists && emailExists.id !== id) {
+      if (emailAlreadyUsed) {
         throw new AppError('Email address already used')
       }
     }
 
-    const updateData = {
-      id,
+    const data: IUpdateUserDTO = {
+      id: user.id!,
       name,
       email,
-      password: userExists.password,
+      ...(password && {
+        password: await this.hashProvider.generateHash(password),
+      }),
     }
 
-    if (password) {
-      updateData.password = await this.hashProvider.generateHash(password)
-    }
+    const updatedUser = await this.usersRepository.update(data)
 
-    const updateUser = await this.userRepository.update(updateData)
+    updatedUser.avatar = getUserAvatarUrl(updatedUser, 'avatar')
 
-    updateUser.avatar = getUserAvatarUrl(updateUser, 'avatar')
-
-    return UserMap.toDTO(updateUser)
+    return UserMap.toDTO(updatedUser)
   }
 }

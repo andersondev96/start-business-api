@@ -10,21 +10,25 @@ export class UserMap {
         email: raw.email,
         password: raw.password,
         avatar: raw.avatar,
+        role: raw.role,
       },
       raw.id,
     )
+
+    user.createdAt = raw.createdAt
+    user.updatedAt = raw.updatedAt
 
     return user
   }
 
   static toDTO(user: User): IUserResponseDTO {
     return {
-      id: user.id,
+      id: user.id!,
       name: user.name,
       email: user.email,
       avatar: user.avatar ?? null,
       role: user.role,
-      createdAt: user.createdAt,
+      createdAt: user.createdAt!,
     }
   }
 }

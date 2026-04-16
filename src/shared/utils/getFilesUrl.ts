@@ -9,10 +9,7 @@ function getBaseUrl(): string {
   return env.disk === 'local' ? env.APP_API_URL : env.AWS_BUCKET_URL
 }
 
-function buildUrl(
-  filename: string | null | undefined,
-  segment: string
-): string | null {
+function buildUrl(filename: string | null | undefined, segment: string): string | null {
   if (!filename || filename.trim() === '') {
     return null
   }
@@ -28,15 +25,12 @@ export function getCompanyImages(company: Company, segment: string): string[] {
     return []
   }
 
-  return company.ImageCompany.map((file) =>
-    buildUrl(file.image_name, segment)
-  ).filter((url): url is string => url !== null)
+  return company.ImageCompany.map((file) => buildUrl(file.image_name, segment)).filter(
+    (url): url is string => url !== null,
+  )
 }
 
-export function getServiceImageUrl(
-  service: Service,
-  segment: string
-): string | null {
+export function getServiceImageUrl(service: Service, segment: string): string | null {
   return buildUrl(service.image_url, segment)
 }
 
@@ -50,9 +44,6 @@ export function getBudgetFiles(budget: Budget, segment: string): string[] {
     .filter((url): url is string => url !== null)
 }
 
-export function getCompanyLogo(
-  settings: EntrepreneurSettings,
-  segment: string
-): string | null {
+export function getCompanyLogo(settings: EntrepreneurSettings, segment: string): string | null {
   return buildUrl(settings.company_logo, segment)
 }

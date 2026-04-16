@@ -29,7 +29,7 @@ export class UsersRepository implements IUsersRepository {
     return user ? UserMap.toDomain(user) : null
   }
 
-  async findByMail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: {
         email,

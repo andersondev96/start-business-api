@@ -28,16 +28,11 @@ export class CreateUserService {
     private entrepreneurSettingsRepository: IEntrepreneursSettingsRepository,
 
     @inject('HashProvider')
-    private hashProvider: IHashProvider
+    private hashProvider: IHashProvider,
   ) {}
 
-  public async execute({
-    name,
-    email,
-    password,
-    role = 'CUSTOMER',
-  }: IRequest): Promise<IResponse> {
-    const userAlreadyExists = await this.userRepository.findByMail(email)
+  public async execute({ name, email, password, role = 'CUSTOMER' }: IRequest): Promise<IResponse> {
+    const userAlreadyExists = await this.userRepository.findByEmail(email)
 
     if (userAlreadyExists) {
       throw new AppError('Email address already used')

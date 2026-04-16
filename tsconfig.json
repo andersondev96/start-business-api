@@ -5,23 +5,19 @@
     "emitDecoratorMetadata": true,
     "module": "commonjs",
     "outDir": "./dist",
+    "rootDir": "./src",
     "paths": {
-      "@modules/*": [
-        "./src/modules/*"
-      ],
-      "@config/*": [
-        "./src/config/*"
-      ],
-      "@shared/*": [
-        "./src/shared/*"
-      ],
-      "@database/*": [
-        "./src/database/*"
-      ]
+      "@modules/*": ["./src/modules/*"],
+      "@config/*": ["./src/config/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@database/*": ["./src/database/*"],
+      "env": ["./src/env"]
     },
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "types": ["vitest/globals", "node"]
+  },
+  "include": ["src/**/*", "**/*.test.ts", "**/*.spec.ts"]
 }

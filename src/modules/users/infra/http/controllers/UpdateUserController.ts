@@ -10,23 +10,21 @@ const updateUserParamsSchema = z.object({
 
 const updateUserBodySchema = z.object({
   name: z.string({ required_error: 'Name is required' }).min(1),
-  email: z
-    .string({ required_error: 'Email is required' })
-    .email('Invalid email format'),
+  email: z.string({ required_error: 'Email is required' }).email('Invalid email format'),
   password: z
     .string({ required_error: 'Password is required' })
     .min(8, 'Password must be at least 8 chars')
     .optional(),
 })
 
-export class UpdateUserController {
-  async handle(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<FastifyReply> {
-    const { id } = updateUserParamsSchema.parse(request.user)
+type UpdateUserBody = z.infer<typeof updateUserBodySchema>
+type UpdateUserParams = z.infer<typeof updateUserParamsSchema>
 
-    const { name, email, password } = updateUserBodySchema.parse(request.body)
+export class UpdateUserController {
+  async handle(request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> {
+    const { id }: UpdateUserParams = updateUserParamsSchema.parse(request.user)
+
+    const { name, email, password }: UpdateUserBody = updateUserBodySchema.parse(request.body)
 
     const updateUserService = container.resolve(UpdateUserService)
     const user = await updateUserService.execute({ id, name, email, password })

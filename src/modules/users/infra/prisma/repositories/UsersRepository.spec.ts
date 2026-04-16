@@ -11,9 +11,7 @@ const makeUserBody = () => ({
 })
 
 describe('UsersRepository Integration', () => {
-  const usersRepository = new UsersRepository(
-    prismaTest as unknown as PrismaClient
-  )
+  const usersRepository = new UsersRepository(prismaTest as unknown as PrismaClient)
 
   beforeEach(async () => {
     await prismaTest.user.deleteMany()
@@ -42,7 +40,7 @@ describe('UsersRepository Integration', () => {
         expect.objectContaining({
           id: createdUser.id,
           email: createdUser.email,
-        })
+        }),
       )
     })
 
@@ -53,19 +51,19 @@ describe('UsersRepository Integration', () => {
     })
   })
 
-  describe('findByMail()', () => {
+  describe('findByEmail()', () => {
     it('should be able to find a user by email', async () => {
       const data = makeUserBody()
       await usersRepository.create(data)
 
-      const foundUser = await usersRepository.findByMail(data.email)
+      const foundUser = await usersRepository.findByEmail(data.email)
 
       expect(foundUser).toBeTruthy()
       expect(foundUser?.id).toBeDefined()
     })
 
     it('should return null if email does not exist', async () => {
-      const user = await usersRepository.findByMail('ghost@example.com')
+      const user = await usersRepository.findByEmail('ghost@example.com')
 
       expect(user).toBeNull()
     })
