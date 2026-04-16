@@ -1,25 +1,23 @@
+type UserTokenProps = {
+  expires_date: Date
+  refresh_token: string
+  user_id: string
+}
+
 export class UserToken {
-  id?: string;
-  expires_date: Date;
-  refresh_token: string;
-  user_id: string;
-  created_at?: string;
-  updated_at?: Date;
+  id?: string
+  expires_date: Date
+  refresh_token: string
+  user_id: string
+  created_at?: Date
+  updated_at?: Date
 
-  private constructor({ expires_date, refresh_token, user_id }: UserToken) {
-    return Object.assign(this, {
-      expires_date,
-      refresh_token,
-      user_id,
-    });
-  }
+  private constructor(props: UserTokenProps, id?: string) {
+    this.expires_date = props.expires_date
+    this.refresh_token = props.refresh_token
+    this.user_id = props.user_id
+    this.id = id
 
-  static create({ expires_date, refresh_token, user_id }: UserToken) {
-    const userToken = new UserToken({
-      expires_date,
-      refresh_token,
-      user_id,
-    });
-    return userToken;
+    if (id) this.id = id
   }
 }
