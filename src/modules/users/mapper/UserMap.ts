@@ -31,4 +31,12 @@ export class UserMap {
       createdAt: user.createdAt!,
     }
   }
+
+  static toGoogleAuthDTO(user: User) {
+    return {
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar ?? null,
+    }
+  }
 }

@@ -7,7 +7,7 @@ import type { IUsersRepository } from '../repositories/IUsersRepository'
 export class DeleteUserService {
   constructor(
     @inject('UsersRepository')
-    private usersRepository: IUsersRepository
+    private usersRepository: IUsersRepository,
   ) {}
 
   public async execute(user_id: string): Promise<void> {
@@ -17,6 +17,6 @@ export class DeleteUserService {
       throw new AppError('User not exists')
     }
 
-    await this.usersRepository.delete(user.id)
+    await this.usersRepository.delete(user.id!)
   }
 }

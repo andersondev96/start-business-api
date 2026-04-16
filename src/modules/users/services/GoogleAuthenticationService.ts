@@ -8,6 +8,7 @@ import { IStorageProvider } from '@shared/container/providers/StorageProvider/mo
 import { IHashProvider } from '../providers/HashProvider/models/IHashProvider'
 import { IUsersRepository } from '../repositories/IUsersRepository'
 import { IUsersTokenRepository } from '../repositories/IUsersTokenRepository'
+import { GOOGLE_USER_DUMMY_PASSWORD } from '../constants/auth'
 
 interface IRequest {
   name?: string
@@ -19,7 +20,7 @@ interface IResponse {
   user: {
     name: string
     email: string
-    avatar: string
+    avatar: string | null
   }
   token: string
   refresh_token: string
@@ -29,7 +30,7 @@ interface IResponse {
 export class GoogleAuthenticationService {
   constructor(
     @inject('UsersRepository')
-    private userRepository: IUsersRepository,
+    private usersRepository: IUsersRepository,
     @inject('UsersTokenRepository')
     private usersTokenRepository: IUsersTokenRepository,
     @inject('HashProvider')
@@ -41,60 +42,69 @@ export class GoogleAuthenticationService {
   ) {}
 
   public async execute({ name, email, avatar }: IRequest): Promise<IResponse> {
-    let user = await this.userRepository.findByEmail(email)
+    const user = await this.findOrCreateUser({ name, email, avatar })
+
+    await this.processUserAvatar(avatar, user.id!)
+
+    const { token, refreshToken } = await this.generateTokens(user.id!)
+
+    await this.usersTokenRepository.create({
+      user_id: user.id!,
+      refresh_token: refreshToken,
+      expires_date: this.dateProvider.addDays(authConfig.expires_refresh_token_days),
+    })
+
+    return {
+      user: {
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar ?? null,
+      },
+      token,
+      refresh_token: refreshToken,
+    }
+  }
+
+  private async findOrCreateUser({ name, email, avatar }: IRequest) {
+    let user = await this.usersRepository.findByEmail(email)
 
     if (!user) {
-      const hashPassword = await this.hashProvider.generateHash('zI3D~*2Y')
-      user = await this.userRepository.create({
-        name,
-        email,
-        password: hashPassword,
-        avatar,
-      })
-
-      if (avatar) {
-        await this.storageProvider.save(avatar, 'avatar')
-      }
+      user = await this.createGoogleUser({ name: name!, email, avatar })
     }
 
-    if (user) {
-      const {
-        secret_token,
-        expires_in_token,
-        secret_refresh_token,
-        expires_in_refresh_token,
-        expires_refresh_token_days,
-      } = authConfig
+    return user
+  }
 
-      const token = sign({}, secret_token, {
-        subject: user.id,
-        expiresIn: expires_in_token,
-      })
+  private async createGoogleUser({ name, email, avatar }: IRequest) {
+    return this.usersRepository.create({
+      name: name!,
+      email,
+      password: await this.hashProvider.generateHash(GOOGLE_USER_DUMMY_PASSWORD),
+      avatar,
+      role: 'CUSTOMER',
+    })
+  }
 
-      const refresh_token = sign({ email }, secret_refresh_token, {
-        subject: user.id,
-        expiresIn: expires_in_refresh_token,
-      })
+  private async processUserAvatar(avatar: string | undefined, userId: string) {
+    if (!avatar) return
 
-      const refresh_token_expires_date = this.dateProvider.addDays(expires_refresh_token_days)
+    await this.storageProvider.save(avatar, 'avatar')
+  }
 
-      await this.usersTokenRepository.create({
-        user_id: user.id,
-        refresh_token,
-        expires_date: refresh_token_expires_date,
-      })
+  private async generateTokens(userId: string) {
+    const { secret_token, expires_in_token, secret_refresh_token, expires_in_refresh_token } =
+      authConfig
 
-      const tokenReturn: IResponse = {
-        token,
-        user: {
-          name: user.name,
-          email: user.email,
-          avatar: user.avatar,
-        },
-        refresh_token,
-      }
+    const token = sign({}, secret_token, {
+      subject: userId,
+      expiresIn: expires_in_token,
+    })
 
-      return tokenReturn
-    }
+    const refreshToken = sign({ email: userId }, secret_refresh_token, {
+      subject: userId,
+      expiresIn: expires_in_refresh_token,
+    })
+
+    return { token, refreshToken }
   }
 }

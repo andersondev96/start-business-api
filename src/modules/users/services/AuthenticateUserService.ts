@@ -51,15 +51,15 @@ export class AuthenticateUserService {
       throw new AppError('Incorrect email/password combination', 401)
     }
 
-    const token = this.tokenProvider.generateAccessToken(user.id)
-    const refresh_token = this.tokenProvider.generateRefreshToken(user.id, email)
+    const token = this.tokenProvider.generateAccessToken(user.id!)
+    const refresh_token = this.tokenProvider.generateRefreshToken(user.id!, email)
 
     const refresh_token_expires_date = this.dateProvider.addDays(
       authConfig.expires_refresh_token_days,
     )
 
     await this.usersTokenRepository.create({
-      user_id: user.id,
+      user_id: user.id!,
       refresh_token,
       expires_date: refresh_token_expires_date,
     })
